@@ -19,6 +19,7 @@ PluginComponent {
     readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
         devices: UPower.devices.values
         mouseType: UPowerDeviceType.Mouse
+        unknownState: UPowerDeviceState.Unknown
         chargingStates: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged]
         stateToString: state => I18n.tr(UPowerDeviceState.toString(state))
         showPercentage: root.pluginData?.showPercentage ?? true

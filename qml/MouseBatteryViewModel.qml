@@ -11,6 +11,7 @@ QtObject {
 
     required property var devices
     required property int mouseType
+    required property int unknownState
     required property var chargingStates
     required property var stateToString
 
@@ -20,7 +21,7 @@ QtObject {
     required property string fallbackName
     required property string disconnectedName
 
-    readonly property var mouse: devices.find(d => d && d.ready && d.type === mouseType) ?? null
+    readonly property var mouse: (devices ?? []).find(d => d && d.ready && d.type === mouseType && d.state !== unknownState) ?? null
     readonly property bool hasMouse: mouse !== null
     readonly property int percent: hasMouse ? Math.round(mouse.percentage * 100) : -1
 
