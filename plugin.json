@@ -6,5 +6,7 @@
     "author": "Elias Mueller",
     "icon": "mouse",
     "type": "widget",
-    "component": "./MouseBatteryWidget.qml"
+    "component": "./MouseBatteryWidget.qml",
+    "settings": "./MouseBatterySettings.qml",
+    "permissions": ["settings_read", "settings_write"]
 }
