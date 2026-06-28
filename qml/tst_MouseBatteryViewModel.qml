@@ -54,7 +54,7 @@ TestCase {
             showPercentage: true
             showBolt: true
             fallbackName: "Generic Mouse"
-            absentName: "Nothing connected"
+            disconnectedName: "Nothing connected"
         }
     }
 
@@ -68,19 +68,19 @@ TestCase {
 
     function test_no_mouse() {
         const control = makeControl([]);
-        verify(!control.present);
+        verify(!control.hasMouse);
         compare(control.percent, -1);
         compare(control.label, "—");
-        compare(control.name, "Nothing connected");
+        compare(control.deviceName, "Nothing connected");
     }
 
     function test_connected_mouse() {
         const control = makeControl([mouse]);
-        verify(control.present);
+        verify(control.hasMouse);
         compare(control.percent, 79);
         compare(control.label, "79%");
-        compare(control.name, "Logitech PRO X 2");
-        compare(control.detail, "79% · " + testCase.stateDischarging);
+        compare(control.deviceName, "Logitech PRO X 2");
+        compare(control.status, "79% · " + testCase.stateDischarging);
     }
 
     function test_bolt_visibility() {
@@ -100,12 +100,12 @@ TestCase {
 
     function test_name_falls_back_without_model() {
         const control = makeControl([mouseWithoutModel]);
-        compare(control.name, "Generic Mouse");
+        compare(control.deviceName, "Generic Mouse");
     }
 
     function test_selects_first_ready_mouse() {
         const control = makeControl([keyboard, mouseNotReady, mouse]);
-        verify(control.present);
+        verify(control.hasMouse);
         compare(control.percent, 79);
     }
 
