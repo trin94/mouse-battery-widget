@@ -26,10 +26,14 @@ that shows your wireless mouse battery level in the bar.
 
 ## Installation
 
-Symlink the plugin into the DMS plugins directory, then enable it from
+Clone the repo and symlink it into the DMS plugins directory, then add the
+widget to the bar from
 [the plugin settings](https://danklinux.com/docs/dankmaterialshell/plugin-development#5-load-it):
 
 ```sh
+git clone https://github.com/trin94/mouse-battery-widget.git
+cd mouse-battery-widget
+mkdir -p ~/.config/DankMaterialShell/plugins
 ln -s "$PWD" ~/.config/DankMaterialShell/plugins/mouse-battery-widget
 ```
 
