@@ -79,15 +79,15 @@ TestCase {
         compare(control.detail, "79% · " + testCase.stateDischarging);
     }
 
-    function test_charging() {
+    function test_bolt_visibility() {
         const whenCharging = makeControl([mouseCharging]);
-        verify(whenCharging.charging);
+        verify(whenCharging.boltVisible);
 
         const whenFullyCharged = makeControl([mouseFullyCharged]);
-        verify(whenFullyCharged.charging);
+        verify(whenFullyCharged.boltVisible);
 
         const whenDischarging = makeControl([mouse]);
-        verify(!whenDischarging.charging);
+        verify(!whenDischarging.boltVisible);
     }
 
     function test_name_falls_back_without_model() {
