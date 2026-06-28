@@ -49,7 +49,6 @@ PluginComponent {
             }
 
             Item {
-                id: boltSlot
                 height: mouseIcon.height
                 width: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
                 anchors.verticalCenter: parent.verticalCenter
@@ -81,7 +80,6 @@ PluginComponent {
             }
 
             Item {
-                id: labelSlot
                 height: labelText.implicitHeight
                 width: root.viewModel.labelVisible ? Theme.spacingXS + labelText.implicitWidth : 0
                 anchors.verticalCenter: parent.verticalCenter
@@ -120,7 +118,6 @@ PluginComponent {
             }
 
             Item {
-                id: boltSlotV
                 width: mouseIconV.width
                 height: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -152,7 +149,6 @@ PluginComponent {
             }
 
             Item {
-                id: labelSlotV
                 width: labelTextV.implicitWidth
                 height: root.viewModel.labelVisible ? Theme.spacingXS + labelTextV.implicitHeight : 0
                 anchors.horizontalCenter: parent.horizontalCenter
