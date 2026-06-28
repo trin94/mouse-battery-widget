@@ -35,24 +35,41 @@ PluginComponent {
 
     horizontalBarPill: Component {
         Row {
-            spacing: Theme.spacingXS
+            spacing: 0
 
             DankIcon {
+                id: mouseIcon
                 name: "mouse"
                 size: root.iconSize
                 color: Theme.surfaceText
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            DankIcon {
-                name: "bolt"
-                size: root.iconSize
-                color: Theme.primary
+            Item {
+                id: boltSlot
+                height: mouseIcon.height
+                width: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
                 anchors.verticalCenter: parent.verticalCenter
-                visible: opacity > 0
-                opacity: root.viewModel.boltVisible ? 1 : 0
+                clip: true
 
-                Behavior on opacity {
+                DankIcon {
+                    name: "bolt"
+                    size: root.iconSize
+                    color: Theme.primary
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.spacingXS
+                    anchors.verticalCenter: parent.verticalCenter
+                    opacity: root.viewModel.boltVisible ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.shortDuration
+                            easing.type: Theme.standardEasing
+                        }
+                    }
+                }
+
+                Behavior on width {
                     NumberAnimation {
                         duration: Theme.shortDuration
                         easing.type: Theme.standardEasing
@@ -60,36 +77,70 @@ PluginComponent {
                 }
             }
 
-            StyledText {
-                text: root.viewModel.label
-                visible: root.viewModel.labelVisible
-                font.pixelSize: root.textSize
-                color: Theme.surfaceText
+            Item {
+                id: labelSlot
+                height: labelText.implicitHeight
+                width: root.viewModel.labelVisible ? Theme.spacingXS + labelText.implicitWidth : 0
                 anchors.verticalCenter: parent.verticalCenter
+                clip: true
+
+                StyledText {
+                    id: labelText
+                    text: root.viewModel.label
+                    font.pixelSize: root.textSize
+                    color: Theme.surfaceText
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.spacingXS
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Theme.standardEasing
+                    }
+                }
             }
         }
     }
 
     verticalBarPill: Component {
         Column {
-            spacing: Theme.spacingXS
+            spacing: 0
 
             DankIcon {
+                id: mouseIconV
                 name: "mouse"
                 size: root.iconSize
                 color: Theme.surfaceText
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            DankIcon {
-                name: "bolt"
-                size: root.iconSize
-                color: Theme.primary
+            Item {
+                id: boltSlotV
+                width: mouseIconV.width
+                height: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: opacity > 0
-                opacity: root.viewModel.boltVisible ? 1 : 0
+                clip: true
 
-                Behavior on opacity {
+                DankIcon {
+                    name: "bolt"
+                    size: root.iconSize
+                    color: Theme.primary
+                    anchors.top: parent.top
+                    anchors.topMargin: Theme.spacingXS
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    opacity: root.viewModel.boltVisible ? 1 : 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Theme.shortDuration
+                            easing.type: Theme.standardEasing
+                        }
+                    }
+                }
+
+                Behavior on height {
                     NumberAnimation {
                         duration: Theme.shortDuration
                         easing.type: Theme.standardEasing
@@ -97,26 +148,30 @@ PluginComponent {
                 }
             }
 
-            StyledText {
-                text: root.viewModel.label
-                visible: root.viewModel.labelVisible
-                font.pixelSize: root.textSize
-                color: Theme.surfaceText
+            Item {
+                id: labelSlotV
+                width: labelTextV.implicitWidth
+                height: root.viewModel.labelVisible ? Theme.spacingXS + labelTextV.implicitHeight : 0
                 anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }
-    }
+                clip: true
 
-    Behavior on width {
-        NumberAnimation {
-            duration: Theme.shortDuration
-            easing.type: Theme.standardEasing
-        }
-    }
-    Behavior on height {
-        NumberAnimation {
-            duration: Theme.shortDuration
-            easing.type: Theme.standardEasing
+                StyledText {
+                    id: labelTextV
+                    text: root.viewModel.label
+                    font.pixelSize: root.textSize
+                    color: Theme.surfaceText
+                    anchors.top: parent.top
+                    anchors.topMargin: Theme.spacingXS
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                Behavior on height {
+                    NumberAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Theme.standardEasing
+                    }
+                }
+            }
         }
     }
 }
