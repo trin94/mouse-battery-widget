@@ -48,7 +48,7 @@ PluginComponent {
                 color: Theme.primary
                 anchors.verticalCenter: parent.verticalCenter
                 visible: opacity > 0
-                opacity: root.viewModel.charging ? 1 : 0
+                opacity: root.viewModel.boltVisible ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -84,7 +84,7 @@ PluginComponent {
                 color: Theme.primary
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: opacity > 0
-                opacity: root.viewModel.charging ? 1 : 0
+                opacity: root.viewModel.boltVisible ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
