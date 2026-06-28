@@ -24,13 +24,13 @@ PluginComponent {
         showPercentage: root.pluginData?.showPercentage ?? true
         showBolt: root.pluginData?.showBolt ?? true
         fallbackName: I18n.tr("Mouse")
-        absentName: I18n.tr("No mouse connected")
+        disconnectedName: I18n.tr("No mouse connected")
     }
 
     popoutContent: Component {
         PopoutComponent {
-            headerText: root.viewModel.name
-            detailsText: root.viewModel.detail
+            headerText: root.viewModel.deviceName
+            detailsText: root.viewModel.status
             showCloseButton: true
         }
     }
