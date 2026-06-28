@@ -14,7 +14,7 @@ PluginSettings {
 
     StyledText {
         width: parent.width
-        text: "Mouse Battery Widget"
+        text: I18n.tr("Mouse Battery Widget")
         font.pixelSize: Theme.fontSizeLarge
         font.weight: Font.Bold
         color: Theme.surfaceText
@@ -22,13 +22,13 @@ PluginSettings {
 
     ToggleSetting {
         settingKey: "showPercentage"
-        label: "Show battery percentage"
+        label: I18n.tr("Show battery percentage")
         defaultValue: true
     }
 
     ToggleSetting {
         settingKey: "showBolt"
-        label: "Show charging indicator"
+        label: I18n.tr("Show charging indicator")
         defaultValue: true
     }
 }
