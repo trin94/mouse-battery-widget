@@ -51,6 +51,8 @@ TestCase {
             mouseType: testCase.typeMouse
             chargingStates: [testCase.stateCharging, testCase.stateFullyCharged]
             stateToString: state => String(state)
+            showPercentage: true
+            showBolt: true
         }
     }
 
@@ -88,6 +90,10 @@ TestCase {
 
         const whenDischarging = makeControl([mouse]);
         verify(!whenDischarging.boltVisible);
+
+        const whenHidden = makeControl([mouseCharging]);
+        whenHidden.showBolt = false;
+        verify(!whenHidden.boltVisible);
     }
 
     function test_name_falls_back_without_model() {
@@ -99,5 +105,17 @@ TestCase {
         const control = makeControl([keyboard, mouseNotReady, mouse]);
         verify(control.present);
         compare(control.percent, 79);
+    }
+
+    function test_label_visibility() {
+        const shown = makeControl([mouse]);
+        verify(shown.labelVisible);
+
+        const hidden = makeControl([mouse]);
+        hidden.showPercentage = false;
+        verify(!hidden.labelVisible);
+
+        const noMouseStillShown = makeControl([]);
+        verify(noMouseStillShown.labelVisible);
     }
 }
