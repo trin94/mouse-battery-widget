@@ -1,0 +1,10 @@
+{
+    "id": "mouseBatteryWidget",
+    "name": "Mouse Battery Widget",
+    "description": "Shows wireless mouse battery level in the bar",
+    "version": "1.0.0",
+    "author": "Elias Mueller",
+    "icon": "mouse",
+    "type": "widget",
+    "component": "./MouseBatteryWidget.qml"
+}

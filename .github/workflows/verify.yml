@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: Elias Mueller
+#
+# SPDX-License-Identifier: MIT
+
+name: Pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  verify_formatting:
+    runs-on: ubuntu-latest
+    name: Lint & Format
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Run pre-commit hooks
+        uses: j178/prek-action@v2
+      - name: Verify REUSE compliance
+        uses: fsfe/reuse-action@v6

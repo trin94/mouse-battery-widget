@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: Elias Mueller
+#
+# SPDX-License-Identifier: MIT
+
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "end-of-file-fixer" },
+    { id = "trailing-whitespace" },
+]
+
+[[repos]]
+repo = "https://github.com/biomejs/pre-commit"
+rev = "v2.5.1"
+hooks = [
+    {
+        id = "biome-check",
+        name = "format json",
+        files = '\.(jsonc?)$',
+        exclude = '\.config/biome\.jsonc',
+        args = ["--config-path=.config"],
+    },
+]
+
+[[repos]]
+repo = "https://github.com/tombi-toml/tombi-pre-commit"
+rev = "v1.1.6"
+hooks = [
+    {
+        id = "tombi-format",
+        name = "format toml",
+        args = [
+            "--offline",
+        ]
+    },
+]
+
+[[repos]]
+repo = "https://github.com/hukkin/mdformat"
+rev = "1.0.0"
+hooks = [
+    {
+        id = "mdformat",
+        name = "format md",
+        exclude = ".github/",
+        args = ["--number", "--wrap", "keep", "--end-of-line", "lf"],
+        additional_dependencies = ["mdformat-gfm"]
+    },
+]
+
+[[repos]]
+repo = "https://github.com/tomas-krupa/qmlformat-hook.git"
+rev = "1.2.0"
+hooks = [
+    {
+        id = "qmlformat",
+        additional_dependencies = ["PySide6-Essentials==6.11.1"],
+        files = '.*\.qml$',
+        name = "format qml",
+        args = ["--settings", ".config/qmlformat.ini"]
+    },
+]
+
+[[repos]]
+repo = "https://github.com/fsfe/reuse-tool"
+rev = "v6.2.0"
+hooks = [
+    {
+        id = "reuse-lint-file",
+        name = "lint licenses",
+    },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+    {
+        id = "just-fmt",
+        name = "format just",
+        entry = "just --fmt",
+        language = "system",
+        files = "^[Jj]ustfile$",
+        pass_filenames = false,
+    },
+]
