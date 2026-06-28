@@ -66,24 +66,23 @@ TestCase {
         return control;
     }
 
-    function test_no_mouse() {
-        const control = makeControl([]);
-        verify(!control.hasMouse);
-        compare(control.percent, -1);
-        compare(control.label, "—");
-        compare(control.deviceName, "Nothing connected");
+    function test_device_presence() {
+        const present = makeControl([mouse]);
+        verify(present.hasMouse);
+        compare(present.percent, 79);
+
+        const absent = makeControl([]);
+        verify(!absent.hasMouse);
+        compare(absent.percent, -1);
     }
 
-    function test_connected_mouse() {
-        const control = makeControl([mouse]);
+    function test_device_selection() {
+        const control = makeControl([keyboard, mouseNotReady, mouse]);
         verify(control.hasMouse);
         compare(control.percent, 79);
-        compare(control.label, "79%");
-        compare(control.deviceName, "Logitech PRO X 2");
-        compare(control.status, "79% · " + testCase.stateDischarging);
     }
 
-    function test_bolt_visibility() {
+    function test_pill_bolt_visibility() {
         const whenCharging = makeControl([mouseCharging]);
         verify(whenCharging.boltVisible);
 
@@ -98,18 +97,15 @@ TestCase {
         verify(!whenHidden.boltVisible);
     }
 
-    function test_name_falls_back_without_model() {
-        const control = makeControl([mouseWithoutModel]);
-        compare(control.deviceName, "Generic Mouse");
+    function test_pill_label_text() {
+        const present = makeControl([mouse]);
+        compare(present.label, "79%");
+
+        const absent = makeControl([]);
+        compare(absent.label, "—");
     }
 
-    function test_selects_first_ready_mouse() {
-        const control = makeControl([keyboard, mouseNotReady, mouse]);
-        verify(control.hasMouse);
-        compare(control.percent, 79);
-    }
-
-    function test_label_visibility() {
+    function test_pill_label_visibility() {
         const shown = makeControl([mouse]);
         verify(shown.labelVisible);
 
@@ -117,7 +113,26 @@ TestCase {
         hidden.showPercentage = false;
         verify(!hidden.labelVisible);
 
-        const noMouseStillShown = makeControl([]);
-        verify(noMouseStillShown.labelVisible);
+        const absentStillShown = makeControl([]);
+        verify(absentStillShown.labelVisible);
+    }
+
+    function test_popout_device_name() {
+        const withModel = makeControl([mouse]);
+        compare(withModel.deviceName, "Logitech PRO X 2");
+
+        const withoutModel = makeControl([mouseWithoutModel]);
+        compare(withoutModel.deviceName, "Generic Mouse");
+
+        const absent = makeControl([]);
+        compare(absent.deviceName, "Nothing connected");
+    }
+
+    function test_popout_status() {
+        const present = makeControl([mouse]);
+        compare(present.status, "79% · " + testCase.stateDischarging);
+
+        const absent = makeControl([]);
+        compare(absent.status, "");
     }
 }
