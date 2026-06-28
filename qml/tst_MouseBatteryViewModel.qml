@@ -53,6 +53,8 @@ TestCase {
             stateToString: state => String(state)
             showPercentage: true
             showBolt: true
+            fallbackName: "Generic Mouse"
+            absentName: "Nothing connected"
         }
     }
 
@@ -69,7 +71,7 @@ TestCase {
         verify(!control.present);
         compare(control.percent, -1);
         compare(control.label, "—");
-        compare(control.name, "No mouse connected");
+        compare(control.name, "Nothing connected");
     }
 
     function test_connected_mouse() {
@@ -98,7 +100,7 @@ TestCase {
 
     function test_name_falls_back_without_model() {
         const control = makeControl([mouseWithoutModel]);
-        compare(control.name, "Mouse");
+        compare(control.name, "Generic Mouse");
     }
 
     function test_selects_first_ready_mouse() {

@@ -20,9 +20,11 @@ PluginComponent {
         devices: UPower.devices.values
         mouseType: UPowerDeviceType.Mouse
         chargingStates: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged]
-        stateToString: state => UPowerDeviceState.toString(state)
+        stateToString: state => I18n.tr(UPowerDeviceState.toString(state))
         showPercentage: root.pluginData?.showPercentage ?? true
         showBolt: root.pluginData?.showBolt ?? true
+        fallbackName: I18n.tr("Mouse")
+        absentName: I18n.tr("No mouse connected")
     }
 
     popoutContent: Component {
