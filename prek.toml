@@ -40,6 +40,17 @@ hooks = [
 ]
 
 [[repos]]
+repo = "https://github.com/google/yamlfmt"
+rev = "v0.21.0"
+hooks = [
+    {
+        id = "yamlfmt",
+        name = "format yml",
+        args = ["-conf", ".config/yamlfmt.yaml"],
+    },
+]
+
+[[repos]]
 repo = "https://github.com/hukkin/mdformat"
 rev = "1.0.0"
 hooks = [
