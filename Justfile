@@ -6,6 +6,7 @@ set lazy
 
 PLUGIN_ID := 'mouseBatteryWidget'
 QMLTESTRUNNER := `command -v qmltestrunner-qt6 || command -v qmltestrunner || echo qmltestrunner`
+LINK := config_directory() / 'DankMaterialShell' / 'plugins' / file_name(justfile_directory())
 
 alias fmt := format
 
@@ -50,6 +51,13 @@ status:
 [group('dms')]
 reload:
     dms ipc call plugins reload {{ PLUGIN_ID }}
+
+# Restart DMS with a fresh plugin symlink
+[group('dms')]
+restart:
+    rm -f {{ LINK }}
+    dms restart
+    ln -s {{ justfile_directory() }} {{ LINK }}
 
 [group('reuse')]
 verify-reuse-compliance:
