@@ -8,7 +8,7 @@
     "icon": "mouse",
     "type": "widget",
     "capabilities": ["dankbar-widget", "battery", "peripheral"],
-    "component": "./MouseBatteryWidget.qml",
-    "settings": "./MouseBatterySettings.qml",
+    "component": "./qml/MouseBatteryWidget.qml",
+    "settings": "./qml/MouseBatterySettings.qml",
     "permissions": ["settings_read", "settings_write"]
 }

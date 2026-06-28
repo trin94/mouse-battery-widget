@@ -18,6 +18,10 @@ format:
 update-hooks:
     prek auto-update
 
+[group('dev')]
+test:
+    qmltestrunner-qt6 -platform offscreen -input qml
+
 # List all plugins and their state
 [group('dms')]
 list:
