@@ -16,14 +16,11 @@ PluginComponent {
 
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
 
-    readonly property QtObject viewModel: QtObject {
-        readonly property var device: UPower.devices.values.find(d => d && d.ready && d.type === UPowerDeviceType.Mouse) ?? null
-        readonly property bool present: device !== null
-        readonly property int percent: present ? Math.round(device.percentage * 100) : -1
-        readonly property bool charging: present && (device.state === UPowerDeviceState.Charging || device.state === UPowerDeviceState.FullyCharged)
-        readonly property string label: present ? percent + "%" : "—"
-        readonly property string name: present ? (device.model || UPowerDeviceType.toString(device.type)) : "No mouse connected"
-        readonly property string detail: present ? percent + "% · " + UPowerDeviceState.toString(device.state) : ""
+    readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
+        devices: UPower.devices.values
+        mouseType: UPowerDeviceType.Mouse
+        chargingStates: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged]
+        stateToString: state => UPowerDeviceState.toString(state)
     }
 
     popoutContent: Component {
