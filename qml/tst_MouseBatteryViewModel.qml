@@ -13,6 +13,7 @@ TestCase {
 
     readonly property int typeMouse: 5
     readonly property int typeKeyboard: 6
+    readonly property int stateUnknown: 0
     readonly property int stateCharging: 1
     readonly property int stateDischarging: 2
     readonly property int stateFullyCharged: 4
@@ -32,6 +33,9 @@ TestCase {
     readonly property MockDevice mouseFullyCharged: MockDevice {
         state: testCase.stateFullyCharged
     }
+    readonly property MockDevice mouseUnknown: MockDevice {
+        state: testCase.stateUnknown
+    }
     readonly property MockDevice mouseWithoutModel: MockDevice {
         model: ""
     }
@@ -49,6 +53,7 @@ TestCase {
 
         MouseBatteryViewModel {
             mouseType: testCase.typeMouse
+            unknownState: testCase.stateUnknown
             chargingStates: [testCase.stateCharging, testCase.stateFullyCharged]
             stateToString: state => String(state)
             showPercentage: true
@@ -74,12 +79,18 @@ TestCase {
         const absent = makeControl([]);
         verify(!absent.hasMouse);
         compare(absent.percent, -1);
+
+        const nullDevices = makeControl(null);
+        verify(!nullDevices.hasMouse);
     }
 
     function test_device_selection() {
-        const control = makeControl([keyboard, mouseNotReady, mouse]);
+        const control = makeControl([keyboard, mouseNotReady, mouseUnknown, mouse]);
         verify(control.hasMouse);
         compare(control.percent, 79);
+
+        const onlyUnmeasured = makeControl([mouseUnknown]);
+        verify(!onlyUnmeasured.hasMouse);
     }
 
     function test_pill_bolt_visibility() {
@@ -95,6 +106,9 @@ TestCase {
         const whenHidden = makeControl([mouseCharging]);
         whenHidden.showBolt = false;
         verify(!whenHidden.boltVisible);
+
+        const whenAbsent = makeControl([]);
+        verify(!whenAbsent.boltVisible);
     }
 
     function test_pill_label_text() {
