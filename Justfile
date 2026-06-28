@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+set lazy
+
 PLUGIN_ID := 'mouseBatteryWidget'
+QMLTESTRUNNER := `command -v qmltestrunner-qt6 || command -v qmltestrunner || echo qmltestrunner`
 
 alias fmt := format
 
@@ -20,7 +23,18 @@ update-hooks:
 
 [group('dev')]
 test:
-    qmltestrunner-qt6 -platform offscreen -input qml
+    {{ QMLTESTRUNNER }} -platform offscreen -input qml
+
+[group('dev')]
+test-ci:
+    #!/usr/bin/env -S uv run --script
+    # /// script
+    # requires-python = ">=3.9"
+    # dependencies = ["PySide6-Essentials==6.11.1"]
+    # ///
+    import sys
+    from PySide6.QtQuickTest import QUICK_TEST_MAIN
+    sys.exit(QUICK_TEST_MAIN("MouseBatteryWidget", [sys.argv[0], "-platform", "offscreen", "-input", "qml"]))
 
 # List all plugins and their state
 [group('dms')]
