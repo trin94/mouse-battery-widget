@@ -14,18 +14,22 @@ import qs.Widgets
 PluginComponent {
     id: root
 
-    readonly property var mouseDevice: UPower.devices.values.find(d => d && d.ready && d.type === UPowerDeviceType.Mouse) ?? null
-    readonly property bool mousePresent: mouseDevice !== null
-    readonly property int batteryPercent: mousePresent ? Math.round(mouseDevice.percentage * 100) : -1
-    readonly property string displayText: mousePresent ? batteryPercent + "%" : "—"
-    readonly property bool charging: mousePresent && (mouseDevice.state === UPowerDeviceState.Charging || mouseDevice.state === UPowerDeviceState.FullyCharged)
-
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
+
+    readonly property QtObject viewModel: QtObject {
+        readonly property var device: UPower.devices.values.find(d => d && d.ready && d.type === UPowerDeviceType.Mouse) ?? null
+        readonly property bool present: device !== null
+        readonly property int percent: present ? Math.round(device.percentage * 100) : -1
+        readonly property bool charging: present && (device.state === UPowerDeviceState.Charging || device.state === UPowerDeviceState.FullyCharged)
+        readonly property string label: present ? percent + "%" : "—"
+        readonly property string name: present ? (device.model || UPowerDeviceType.toString(device.type)) : "No mouse connected"
+        readonly property string detail: present ? percent + "% · " + UPowerDeviceState.toString(device.state) : ""
+    }
 
     popoutContent: Component {
         PopoutComponent {
-            headerText: root.mousePresent ? root.mouseDevice.model : "No mouse connected"
-            detailsText: root.mousePresent ? root.batteryPercent + "% · " + UPowerDeviceState.toString(root.mouseDevice.state) : ""
+            headerText: root.viewModel.name
+            detailsText: root.viewModel.detail
             showCloseButton: true
         }
     }
@@ -43,18 +47,11 @@ PluginComponent {
 
             DankIcon {
                 name: "bolt"
-                size: root.charging ? root.iconSize : 0
+                size: root.iconSize
                 color: Theme.primary
                 anchors.verticalCenter: parent.verticalCenter
                 visible: opacity > 0
-                opacity: root.charging ? 1 : 0
-
-                Behavior on size {
-                    NumberAnimation {
-                        duration: Theme.shortDuration
-                        easing.type: Theme.standardEasing
-                    }
-                }
+                opacity: root.viewModel.charging ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -65,7 +62,7 @@ PluginComponent {
             }
 
             StyledText {
-                text: root.displayText
+                text: root.viewModel.label
                 font.pixelSize: root.textSize
                 color: Theme.surfaceText
                 anchors.verticalCenter: parent.verticalCenter
@@ -86,18 +83,11 @@ PluginComponent {
 
             DankIcon {
                 name: "bolt"
-                size: root.charging ? root.iconSize : 0
+                size: root.iconSize
                 color: Theme.primary
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: opacity > 0
-                opacity: root.charging ? 1 : 0
-
-                Behavior on size {
-                    NumberAnimation {
-                        duration: Theme.shortDuration
-                        easing.type: Theme.standardEasing
-                    }
-                }
+                opacity: root.viewModel.charging ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -108,7 +98,7 @@ PluginComponent {
             }
 
             StyledText {
-                text: root.displayText
+                text: root.viewModel.label
                 font.pixelSize: root.textSize
                 color: Theme.surfaceText
                 anchors.horizontalCenter: parent.horizontalCenter
