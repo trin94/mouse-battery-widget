@@ -76,6 +76,21 @@ hooks = [
 ]
 
 [[repos]]
+repo = "https://github.com/python-jsonschema/check-jsonschema"
+rev = "0.37.3"
+hooks = [
+    {
+        id = "check-jsonschema",
+        name = "validate plugin.json",
+        files = '^plugin\.json$',
+        args = [
+            "--schemafile",
+            "https://raw.githubusercontent.com/AvengeMedia/DankMaterialShell/refs/heads/master/quickshell/PLUGINS/plugin-schema.json",
+        ],
+    },
+]
+
+[[repos]]
 repo = "local"
 hooks = [
     {
