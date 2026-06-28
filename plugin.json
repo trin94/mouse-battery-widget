@@ -1,4 +1,5 @@
 {
+    "$schema": "https://raw.githubusercontent.com/AvengeMedia/DankMaterialShell/refs/heads/master/quickshell/PLUGINS/plugin-schema.json",
     "id": "mouseBatteryWidget",
     "name": "Mouse Battery Widget",
     "description": "Shows wireless mouse battery level in the bar",
@@ -6,6 +7,7 @@
     "author": "Elias Mueller",
     "icon": "mouse",
     "type": "widget",
+    "capabilities": ["dankbar-widget", "battery", "peripheral"],
     "component": "./MouseBatteryWidget.qml",
     "settings": "./MouseBatterySettings.qml",
     "permissions": ["settings_read", "settings_write"]
