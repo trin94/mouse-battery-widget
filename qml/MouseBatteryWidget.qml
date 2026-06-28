@@ -21,6 +21,8 @@ PluginComponent {
         mouseType: UPowerDeviceType.Mouse
         chargingStates: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged]
         stateToString: state => UPowerDeviceState.toString(state)
+        showPercentage: root.pluginData?.showPercentage ?? true
+        showBolt: root.pluginData?.showBolt ?? true
     }
 
     popoutContent: Component {
@@ -60,6 +62,7 @@ PluginComponent {
 
             StyledText {
                 text: root.viewModel.label
+                visible: root.viewModel.labelVisible
                 font.pixelSize: root.textSize
                 color: Theme.surfaceText
                 anchors.verticalCenter: parent.verticalCenter
@@ -96,6 +99,7 @@ PluginComponent {
 
             StyledText {
                 text: root.viewModel.label
+                visible: root.viewModel.labelVisible
                 font.pixelSize: root.textSize
                 color: Theme.surfaceText
                 anchors.horizontalCenter: parent.horizontalCenter

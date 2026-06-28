@@ -25,4 +25,10 @@ PluginSettings {
         label: "Show battery percentage"
         defaultValue: true
     }
+
+    ToggleSetting {
+        settingKey: "showBolt"
+        label: "Show charging indicator"
+        defaultValue: true
+    }
 }
