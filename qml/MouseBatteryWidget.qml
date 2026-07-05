@@ -7,6 +7,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 
 import Quickshell.Services.UPower
+
 import qs.Common
 import qs.Modules.Plugins
 import qs.Widgets
