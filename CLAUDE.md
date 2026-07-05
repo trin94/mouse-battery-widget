@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 - Checkout common commands by running the command `just`.
 - Run linter and formatter via `just fmt`.
 
-# Coding
+## Coding
 
 - Follow clean code principles.
 - Don't use structural comments like `# region` or `# ---`.
@@ -35,7 +35,7 @@ SPDX-License-Identifier: MIT
   16. States
   17. Transitions
 
-# Committing
+## Committing
 
 - Run all pre-commit hooks via `just fmt` to confirm everything's fine before commiting.
 - Verify the documentation is up to date before commiting.
