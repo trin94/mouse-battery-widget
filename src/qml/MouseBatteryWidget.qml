@@ -6,8 +6,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
-import Quickshell.Services.UPower
-
 import qs.Common
 import qs.Modules.Plugins
 import qs.Widgets
@@ -18,15 +16,8 @@ PluginComponent {
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
 
     readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
-        devices: UPower.devices.values
-        mouseType: UPowerDeviceType.Mouse
-        unknownState: UPowerDeviceState.Unknown
-        chargingStates: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged]
-        stateToString: state => I18n.tr(UPowerDeviceState.toString(state))
         showPercentage: root.pluginData?.showPercentage ?? true
         showBolt: root.pluginData?.showBolt ?? true
-        fallbackName: I18n.tr("Mouse")
-        disconnectedName: I18n.tr("No mouse connected")
     }
 
     popoutContent: Component {

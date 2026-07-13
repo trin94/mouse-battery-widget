@@ -210,3 +210,8 @@ tags
 
 # Claude Code local settings
 .claude/
+
+# Python artifacts from the system tests
+__pycache__/
+.pytest_cache/
+/.rumdl_cache/

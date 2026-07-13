@@ -5,7 +5,6 @@
 set lazy
 
 PLUGIN_ID := 'mouseBatteryWidget'
-QMLTESTRUNNER := `command -v qmltestrunner-qt6 || command -v qmltestrunner || echo qmltestrunner`
 LINK := config_directory() / 'DankMaterialShell' / 'plugins' / file_name(justfile_directory())
 
 alias fmt := format
@@ -23,19 +22,8 @@ update-hooks:
     prek auto-update
 
 [group('dev')]
-test:
-    {{ QMLTESTRUNNER }} -platform offscreen -input qml
-
-[group('dev')]
-test-ci:
-    #!/usr/bin/env -S uv run --script
-    # /// script
-    # requires-python = ">=3.9"
-    # dependencies = ["PySide6-Essentials==6.11.1"]
-    # ///
-    import sys
-    from PySide6.QtQuickTest import QUICK_TEST_MAIN
-    sys.exit(QUICK_TEST_MAIN("MouseBatteryWidget", [sys.argv[0], "-platform", "offscreen", "-input", "qml"]))
+test *args:
+    uv run src/test_mouse_battery.py {{ args }}
 
 # List all plugins and their state
 [group('dms')]

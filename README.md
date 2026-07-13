@@ -52,8 +52,21 @@ and open your editor here:
 ln -s /path/to/DankMaterialShell/quickshell/.qmlls.ini .qmlls.ini
 ```
 
-Tooling: [just](https://github.com/casey/just) for the task runner and
-[prek](https://prek.j178.dev) for the formatting and pre-commit hooks.
+Required tools:
+
+- [just](https://github.com/casey/just) runs the development tasks.
+- [prek](https://prek.j178.dev) runs the formatting and pre-commit hooks; it
+  installs the hook tools itself.
+- [uv](https://docs.astral.sh/uv/) runs the test suite.
+- [quickshell](https://quickshell.outfoxxed.me) is launched headless by the
+  tests.
+- `dbus-daemon` hosts the private bus the tests fake UPower on.
+- `dms` drives the hot-reload recipes; it comes with Dank Material Shell.
+- [reuse](https://reuse.software) checks license compliance
+  (`just verify-reuse-compliance`).
+
+Testing: `just test` launches the real quickshell binary headless against an
+in-process fake UPower daemon and asserts the derived state over IPC.
 
 Hot-reload and formatting are driven by the [`Justfile`](Justfile); run `just`
 for a list of actions (and `just fmt` before committing).
