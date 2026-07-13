@@ -216,3 +216,7 @@ tags
 __pycache__/
 .pytest_cache/
 /.rumdl_cache/
+
+# Mock bar: generated symlinks into the installed DMS config
+/src/mock/preview/*
+!/src/mock/preview/shell.qml

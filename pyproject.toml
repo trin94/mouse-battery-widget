@@ -32,6 +32,13 @@ matches = "src/upower_service.py"
 [tool.pyrefly.sub-config.errors]
 unknown-name = false
 
+# dbus-fast requires D-Bus signature strings as annotations
+[[tool.pyrefly.sub-config]]
+matches = "src/mock/serve.py"
+
+[tool.pyrefly.sub-config.errors]
+unknown-name = false
+
 [tool.ruff]
 line-length = 120
 
@@ -94,6 +101,16 @@ extend-select = [
 
 "**/harness.py" = [
     "S404",          # Spawning subprocesses is the harness's job
+    "S603",
+    "S607",
+]
+
+"**/mock/serve.py" = [
+    "ANN",              # dbus-fast requires D-Bus signature strings as annotations
+    "F821",             # D-Bus signature strings look like undefined names
+    "PLR6301",          # dbus-fast requires instance methods on service interfaces
+    "UP037",            # The signature strings must stay quoted strings at runtime
+    "S404",             # Spawning subprocesses is the mock's job
     "S603",
     "S607",
 ]
