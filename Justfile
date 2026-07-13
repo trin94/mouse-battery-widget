@@ -9,9 +9,12 @@ LINK := config_directory() / 'DankMaterialShell' / 'plugins' / file_name(justfil
 
 alias fmt := format
 
-# List available recipes
-default:
-    @just --list --unsorted
+# Preview the widget in a mock bar against a mocked mouse
+mod mock 'src/mock'
+
+[private]
+@default:
+    just --list --unsorted
 
 # Set up the Python environment
 [group('dev')]

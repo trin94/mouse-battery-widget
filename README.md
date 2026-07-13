@@ -11,7 +11,8 @@ that shows your wireless mouse battery level in the bar.
 
 - Battery percentage in a bar pill (a dash when no mouse is connected).
 - Bolt icon while charging.
-- Click for a popout with the mouse name and charge state.
+- Click for a popout with the mouse name, charge state, level bar, and time
+  estimate.
 - Reads `Quickshell.Services.UPower` directly. No polling or shelling out.
 
 ## Requirements
@@ -63,10 +64,11 @@ Required tools:
 The most important recipes (run `just` for the full list):
 
 ```sh
-just init    # Set up the Python environment
-just fmt     # Run all formatting and lint hooks
-just test    # Run the system tests
-just reload  # Reload the plugin after making changes
+just init        # Set up the Python environment
+just fmt         # Run all formatting and lint hooks
+just test        # Run the system tests
+just reload      # Reload the plugin after making changes
+just mock start  # Show the widget in a mock bar with a fake mouse
 ```
 
 `just test` launches the real quickshell binary headless against an in-process
