@@ -21,10 +21,8 @@ PluginComponent {
     }
 
     popoutContent: Component {
-        PopoutComponent {
-            headerText: root.viewModel.deviceName
-            detailsText: root.viewModel.status
-            showCloseButton: true
+        MouseBatteryPopout {
+            viewModel: root.viewModel
         }
     }
 
