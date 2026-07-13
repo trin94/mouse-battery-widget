@@ -212,6 +212,7 @@ tags
 .claude/
 
 # Python artifacts from the system tests
+/.venv/
 __pycache__/
 .pytest_cache/
 /.rumdl_cache/

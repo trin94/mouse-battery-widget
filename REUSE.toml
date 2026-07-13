@@ -9,3 +9,9 @@ path = "plugin.json"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Elias Mueller"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "uv.lock"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Elias Mueller"
+SPDX-License-Identifier = "MIT"

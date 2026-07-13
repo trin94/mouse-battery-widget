@@ -13,14 +13,27 @@ alias fmt := format
 default:
     @just --list --unsorted
 
+# Set up the Python environment
+[group('dev')]
+init:
+    uv sync
+
+# Run all formatting and lint hooks
 [group('dev')]
 format:
-    prek run --all-files
+    uv run prek run --all-files
 
+# Update the pre-commit hook versions
 [group('dev')]
 update-hooks:
-    prek auto-update
+    uv run prek auto-update
 
+# Upgrade all Python dependencies
+[group('dev')]
+update-dependencies:
+    uv sync --upgrade
+
+# Run the system tests
 [group('dev')]
 test *args:
     uv run src/test_mouse_battery.py {{ args }}
@@ -46,7 +59,3 @@ restart:
     rm -f {{ LINK }}
     dms restart
     ln -s {{ justfile_directory() }} {{ LINK }}
-
-[group('reuse')]
-verify-reuse-compliance:
-    reuse lint
