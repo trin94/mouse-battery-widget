@@ -98,6 +98,7 @@ def test_discharging_mouse_is_shown(mouse: str, make_view_model: MakeViewModel) 
     assert not state["isLow"]
     assert not state["boltVisible"]
     assert state["labelVisible"]
+    assert not state["durationText"]
 
 
 def test_charging_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -177,6 +178,35 @@ def test_label_stays_hidden_when_percentage_disabled(mouse: str, make_view_model
 
     state = vm.wait_state(itemgetter("hasMouse"))
     assert not state["labelVisible"]
+
+
+def test_discharging_mouse_shows_time_remaining(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
+    mock.update_device(mouse, TimeToEmpty=4500)
+
+    vm = make_view_model()
+
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert state["durationText"] == "1h 15m"
+
+
+def test_charging_mouse_shows_time_until_full(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
+    mock.update_device(mouse, State=STATE_CHARGING, TimeToFull=2700, TimeToEmpty=9999)
+
+    vm = make_view_model()
+
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert state["durationText"] == "45m"
+
+
+def test_charging_mouse_without_estimate_has_no_duration(
+    mock: UPowerMock, mouse: str, make_view_model: MakeViewModel
+) -> None:
+    mock.update_device(mouse, State=STATE_CHARGING, TimeToEmpty=9999)
+
+    vm = make_view_model()
+
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert not state["durationText"]
 
 
 def test_low_discharging_mouse_is_marked_low(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:

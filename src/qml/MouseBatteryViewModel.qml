@@ -29,4 +29,17 @@ QtObject {
 
     readonly property string deviceName: hasMouse ? (mouse.model || "Mouse") : "No mouse connected"
     readonly property string stateText: hasMouse ? UPowerDeviceState.toString(mouse.state) : ""
+    readonly property string durationText: {
+        if (!hasMouse)
+            return "";
+        if (isCharging)
+            return mouse.timeToFull > 0 ? formatDuration(mouse.timeToFull) : "";
+        return mouse.timeToEmpty > 0 ? formatDuration(mouse.timeToEmpty) : "";
+    }
+
+    function formatDuration(seconds: real): string {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
+    }
 }
