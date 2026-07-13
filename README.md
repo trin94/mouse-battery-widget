@@ -12,7 +12,7 @@ that shows your wireless mouse battery level in the bar.
 - Battery percentage in a bar pill (a dash when no mouse is connected).
 - Bolt icon while charging.
 - Click for a popout with the mouse name and charge state.
-- Reads `Quickshell.Services.UPower` directly; no polling or shelling out.
+- Reads `Quickshell.Services.UPower` directly. No polling or shelling out.
 
 ## Requirements
 
@@ -26,7 +26,7 @@ that shows your wireless mouse battery level in the bar.
 
 ## Installation
 
-This plugin is not yet listed in the official third-party plugin repository, so
+This plugin is not yet in the official third-party plugin repository, so
 install it manually.
 
 Clone the repo and symlink it into the DMS plugins directory, then add the
@@ -55,23 +55,24 @@ ln -s /path/to/DankMaterialShell/quickshell/.qmlls.ini .qmlls.ini
 Required tools:
 
 - [just](https://github.com/casey/just) runs the development tasks.
-- [prek](https://prek.j178.dev) runs the formatting and pre-commit hooks; it
-  installs the hook tools itself.
-- [uv](https://docs.astral.sh/uv/) runs the test suite.
-- [quickshell](https://quickshell.outfoxxed.me) is launched headless by the
-  tests.
+- [uv](https://docs.astral.sh/uv/) manages the Python environment and installs
+  all dev dependencies itself.
 - `dbus-daemon` hosts the private bus the tests fake UPower on.
-- `dms` drives the hot-reload recipes; it comes with Dank Material Shell.
-- [reuse](https://reuse.software) checks license compliance
-  (`just verify-reuse-compliance`).
+- `dms` drives the hot-reload recipes. It comes with Dank Material Shell.
 
-Testing: `just test` launches the real quickshell binary headless against an
-in-process fake UPower daemon and asserts the derived state over IPC.
+The most important recipes (run `just` for the full list):
 
-Hot-reload and formatting are driven by the [`Justfile`](Justfile); run `just`
-for a list of actions (and `just fmt` before committing).
+```sh
+just init    # Set up the Python environment
+just fmt     # Run all formatting and lint hooks
+just test    # Run the system tests
+just reload  # Reload the plugin after making changes
+```
+
+`just test` launches the real quickshell binary headless against an in-process
+fake UPower daemon and asserts the derived state over IPC.
 
 ## License
 
 [MIT](LICENSES/MIT.txt), following the [REUSE](https://reuse.software)
-specification; per-file copyright lives in the SPDX headers.
+specification. Per-file copyright lives in the SPDX headers.

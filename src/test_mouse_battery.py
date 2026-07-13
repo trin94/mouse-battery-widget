@@ -1,8 +1,3 @@
-# /// script
-# requires-python = ">=3.9"
-# dependencies = ["pytest", "dbus-fast"]
-# ///
-
 # SPDX-FileCopyrightText: Elias Mueller
 #
 # SPDX-License-Identifier: MIT
@@ -20,10 +15,18 @@ model computes from Quickshell's real UPower client code.
 import itertools
 import sys
 import time
+from operator import itemgetter
+from typing import TYPE_CHECKING
 
 import pytest
 
 from harness import ProbeSession, UPowerMock, ViewModel
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
+type MakeViewModel = Callable[..., ViewModel]
+type AddMouse = Callable[..., str]
 
 TYPE_MOUSE = 5
 TYPE_KEYBOARD = 6
@@ -32,39 +35,42 @@ STATE_CHARGING = 1
 STATE_DISCHARGING = 2
 STATE_FULLY_CHARGED = 4
 
+DEFAULT_PERCENTAGE = 100.0
+DISCONNECTED_PERCENT = -1
+
 
 @pytest.fixture
-def mock():
+def mock() -> Iterator[UPowerMock]:
     upower = UPowerMock()
     yield upower
     upower.close()
 
 
 @pytest.fixture
-def probe_session(mock):
+def probe_session(mock: UPowerMock) -> Iterator[ProbeSession]:
     session = ProbeSession(mock)
     yield session
     session.close()
 
 
 @pytest.fixture
-def make_view_model(probe_session):
-    def start(**properties):
+def make_view_model(probe_session: ProbeSession) -> MakeViewModel:
+    def start(**properties: object) -> ViewModel:
         return ViewModel(probe_session, **properties)
 
     return start
 
 
 @pytest.fixture
-def add_mouse(mock):
+def add_mouse(mock: UPowerMock) -> AddMouse:
     ids = itertools.count()
 
-    def add(**props):
+    def add(**props: object) -> str:
         device_id = next(ids)
         defaults = {
             "Type": TYPE_MOUSE,
             "State": STATE_DISCHARGING,
-            "Percentage": 100.0,
+            "Percentage": DEFAULT_PERCENTAGE,
             "Model": "Test Mouse",
             "NativePath": f"hidpp_battery_{device_id}",
         }
@@ -74,15 +80,15 @@ def add_mouse(mock):
 
 
 @pytest.fixture
-def mouse(add_mouse):
+def mouse(add_mouse: AddMouse) -> str:
     return add_mouse()
 
 
-def test_discharging_mouse_is_shown(mouse, make_view_model):
+def test_discharging_mouse_is_shown(mouse: str, make_view_model: MakeViewModel) -> None:
     vm = make_view_model()
 
-    state = vm.wait_state(lambda s: s["hasMouse"])
-    assert state["percent"] == 100
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert state["percent"] == DEFAULT_PERCENTAGE
     assert state["label"] == "100%"
     assert state["deviceName"] == "Test Mouse"
     assert state["status"] == "100% · Discharging"
@@ -90,7 +96,7 @@ def test_discharging_mouse_is_shown(mouse, make_view_model):
     assert state["labelVisible"]
 
 
-def test_charging_mouse_shows_bolt(mock, mouse, make_view_model):
+def test_charging_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     mock.update_device(mouse, Percentage=50.0, State=STATE_CHARGING)
 
     vm = make_view_model()
@@ -99,53 +105,55 @@ def test_charging_mouse_shows_bolt(mock, mouse, make_view_model):
     assert state["boltVisible"]
 
 
-def test_fully_charged_mouse_shows_bolt(mock, mouse, make_view_model):
+def test_fully_charged_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     mock.update_device(mouse, State=STATE_FULLY_CHARGED)
 
     vm = make_view_model()
 
-    state = vm.wait_state(lambda s: s["boltVisible"])
+    state = vm.wait_state(itemgetter("boltVisible"))
     assert state["status"] == "100% · Fully Charged"
 
 
-def test_property_updates_propagate(mock, mouse, make_view_model):
+def test_property_updates_propagate(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     vm = make_view_model()
-    vm.wait_state(lambda s: s["hasMouse"])
+    vm.wait_state(itemgetter("hasMouse"))
 
-    mock.update_device(mouse, Percentage=12.0, State=STATE_CHARGING)
+    percentage = 12.0
+    mock.update_device(mouse, Percentage=percentage, State=STATE_CHARGING)
 
-    state = vm.wait_state(lambda s: s["percent"] == 12)
+    state = vm.wait_state(lambda s: s["percent"] == percentage)
     assert state["boltVisible"]
     assert state["status"] == "12% · Charging"
 
 
-def test_removed_mouse_shows_disconnected(mock, mouse, make_view_model):
+def test_removed_mouse_shows_disconnected(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     vm = make_view_model()
-    vm.wait_state(lambda s: s["hasMouse"])
+    vm.wait_state(itemgetter("hasMouse"))
 
     mock.remove_device(mouse)
 
     state = vm.wait_state(lambda s: not s["hasMouse"])
     assert state["label"] == "—"
     assert state["deviceName"] == "No mouse connected"
-    assert state["percent"] == -1
-    assert state["status"] == ""
+    assert state["percent"] == DISCONNECTED_PERCENT
+    assert not state["status"]
     assert not state["boltVisible"]
     assert state["labelVisible"]
 
 
-def test_mouse_added_at_runtime_is_picked_up(add_mouse, make_view_model):
+def test_mouse_added_at_runtime_is_picked_up(add_mouse: AddMouse, make_view_model: MakeViewModel) -> None:
     vm = make_view_model()
     state = vm.wait_ready()
     assert not state["hasMouse"]
 
-    add_mouse(Percentage=42.0)
+    percentage = 42.0
+    add_mouse(Percentage=percentage)
 
-    state = vm.wait_state(lambda s: s["hasMouse"])
-    assert state["percent"] == 42
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert state["percent"] == percentage
 
 
-def test_bolt_stays_hidden_when_disabled(mock, mouse, make_view_model):
+def test_bolt_stays_hidden_when_disabled(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     mock.update_device(mouse, State=STATE_CHARGING)
 
     vm = make_view_model(showBolt=False)
@@ -154,33 +162,35 @@ def test_bolt_stays_hidden_when_disabled(mock, mouse, make_view_model):
     assert not state["boltVisible"]
 
 
-def test_label_stays_hidden_when_percentage_disabled(mouse, make_view_model):
+def test_label_stays_hidden_when_percentage_disabled(mouse: str, make_view_model: MakeViewModel) -> None:
     vm = make_view_model(showPercentage=False)
 
-    state = vm.wait_state(lambda s: s["hasMouse"])
+    state = vm.wait_state(itemgetter("hasMouse"))
     assert not state["labelVisible"]
 
 
-def test_mouse_without_model_gets_fallback_name(mock, mouse, make_view_model):
+def test_mouse_without_model_gets_fallback_name(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     mock.update_device(mouse, Model="")
 
     vm = make_view_model()
 
-    state = vm.wait_state(lambda s: s["hasMouse"])
+    state = vm.wait_state(itemgetter("hasMouse"))
     assert state["deviceName"] == "Mouse"
 
 
-def test_mouse_with_unknown_state_is_ignored(mock, mouse, make_view_model):
+def test_mouse_with_unknown_state_is_ignored(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
     mock.update_device(mouse, State=STATE_UNKNOWN)
 
     vm = make_view_model()
 
     vm.wait_ready()
     time.sleep(0.5)
-    assert not vm.state()["hasMouse"]
+    state = vm.state()
+    assert state is not None
+    assert not state["hasMouse"]
 
 
-def test_non_mouse_devices_are_ignored(mock, make_view_model):
+def test_non_mouse_devices_are_ignored(mock: UPowerMock, make_view_model: MakeViewModel) -> None:
     mock.add_device(
         "keyboard_test",
         Type=TYPE_KEYBOARD,
@@ -194,11 +204,14 @@ def test_non_mouse_devices_are_ignored(mock, make_view_model):
     vm.wait_ready()
     time.sleep(0.5)
     state = vm.state()
+    assert state is not None
     assert not state["hasMouse"]
     assert state["deviceName"] == "No mouse connected"
 
 
-def test_qualifying_mouse_is_picked_among_other_devices(mock, add_mouse, make_view_model):
+def test_qualifying_mouse_is_picked_among_other_devices(
+    mock: UPowerMock, add_mouse: AddMouse, make_view_model: MakeViewModel
+) -> None:
     mock.add_device(
         "keyboard_test",
         Type=TYPE_KEYBOARD,
@@ -207,12 +220,13 @@ def test_qualifying_mouse_is_picked_among_other_devices(mock, add_mouse, make_vi
         Model="Test Keyboard",
     )
     add_mouse(State=STATE_UNKNOWN, Model="Unknown Mouse")
-    add_mouse(Percentage=63.0)
+    percentage = 63.0
+    add_mouse(Percentage=percentage)
 
     vm = make_view_model()
 
-    state = vm.wait_state(lambda s: s["hasMouse"])
-    assert state["percent"] == 63
+    state = vm.wait_state(itemgetter("hasMouse"))
+    assert state["percent"] == percentage
     assert state["deviceName"] == "Test Mouse"
 
 
