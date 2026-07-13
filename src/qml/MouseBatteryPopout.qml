@@ -60,6 +60,13 @@ PopoutComponent {
             }
         }
 
+        StyledText {
+            text: root.viewModel.isCharging ? I18n.tr("Time until full: %1").arg(root.viewModel.durationText) : I18n.tr("Time remaining: %1").arg(root.viewModel.durationText)
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.surfaceVariantText
+            visible: root.viewModel.durationText.length > 0
+        }
+
         Rectangle {
             width: parent.width
             height: 8
