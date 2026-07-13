@@ -14,14 +14,19 @@ QtObject {
     required property bool showPercentage
     required property bool showBolt
 
+    readonly property int lowBatteryPercent: 20
+
     readonly property var mouse: UPower.devices.values.find(d => d.ready && d.type === UPowerDeviceType.Mouse && d.state !== UPowerDeviceState.Unknown) ?? null
     readonly property bool hasMouse: mouse !== null
     readonly property int percent: hasMouse ? Math.round(mouse.percentage * 100) : -1
+    readonly property real level: hasMouse ? mouse.percentage : 0
+    readonly property bool isCharging: hasMouse && (mouse.state === UPowerDeviceState.Charging || mouse.state === UPowerDeviceState.FullyCharged)
+    readonly property bool isLow: hasMouse && !isCharging && percent <= lowBatteryPercent
 
-    readonly property bool boltVisible: hasMouse && showBolt && (mouse.state === UPowerDeviceState.Charging || mouse.state === UPowerDeviceState.FullyCharged)
+    readonly property bool boltVisible: isCharging && showBolt
     readonly property bool labelVisible: showPercentage
     readonly property string label: hasMouse ? percent + "%" : "—"
 
     readonly property string deviceName: hasMouse ? (mouse.model || "Mouse") : "No mouse connected"
-    readonly property string status: hasMouse ? percent + "% · " + UPowerDeviceState.toString(mouse.state) : ""
+    readonly property string stateText: hasMouse ? UPowerDeviceState.toString(mouse.state) : ""
 }
