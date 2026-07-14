@@ -15,10 +15,16 @@ PopoutComponent {
 
     required property MouseBatteryViewModel viewModel
 
+    function formatDuration(seconds: real): string {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
+    }
+
     headerText: viewModel.deviceName
 
     // qmlformat off
-    detailsText: viewModel.hasMouse ? ""
+    detailsText: viewModel.isReporting ? ""
         : viewModel.isMouseDetected ? I18n.tr("No recent battery data. Waiting for the mouse to report.")
         : I18n.tr("No supported mouse detected.")
     // qmlformat on
@@ -43,7 +49,7 @@ PopoutComponent {
             // qmlformat off
             to: root.viewModel.isStale ? Theme.surfaceVariantText
                 : root.viewModel.isLow ? Theme.error
-                : root.viewModel.isCharging ? Theme.primary
+                : root.viewModel.isPluggedIn ? Theme.primary
                 : Theme.surfaceText
             // qmlformat on
         }
@@ -69,19 +75,28 @@ PopoutComponent {
             }
 
             StyledText {
-                text: root.viewModel.stateText
+                // qmlformat off
+                text: root.viewModel.isFullyCharged ? I18n.tr("Fully charged")
+                    : root.viewModel.isPluggedIn ? I18n.tr("Charging")
+                    : I18n.tr("Discharging")
+                // qmlformat on
                 font.pixelSize: Theme.fontSizeLarge
                 font.weight: Font.Medium
                 color: Theme.surfaceVariantText
+                visible: root.viewModel.isReporting
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
 
         StyledText {
-            text: root.viewModel.isCharging ? I18n.tr("Time until full: %1").arg(root.viewModel.durationText) : I18n.tr("Time remaining: %1").arg(root.viewModel.durationText)
+            // qmlformat off
+            text: root.viewModel.isPluggedIn
+                ? I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
+                : I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
+            // qmlformat on
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
-            visible: root.viewModel.durationText.length > 0
+            visible: root.viewModel.durationSeconds > 0
         }
 
         Rectangle {
