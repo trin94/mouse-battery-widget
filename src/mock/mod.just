@@ -41,7 +41,7 @@ start: _links
 @percentage value:
     busctl --user call {{ CONTROL }} / {{ CONTROL }} SetPercentage d {{ value }} || { echo 'hint: start the mock bar with `just mock start`'; exit 1; }
 
-# Set the mock charge state on the running bar (charging, discharging, full)
+# Set the mock charge state on the running bar (unknown, charging, discharging, full)
 @state value:
     busctl --user call {{ CONTROL }} / {{ CONTROL }} SetState s {{ value }} || { echo 'hint: start the mock bar with `just mock start`'; exit 1; }
 
