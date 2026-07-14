@@ -27,7 +27,8 @@ QtObject {
     readonly property bool shouldShowLabel: showPercentage && hasData
     readonly property string label: hasData ? percent + "%" : ""
     readonly property string deviceName: _private.current.deviceName
-    readonly property real durationSeconds: _private.current.durationSeconds
+    readonly property real secondsUntilEmpty: _private.current.secondsUntilEmpty
+    readonly property real secondsUntilFull: _private.current.secondsUntilFull
 
     component NullDevice: QtObject {
         readonly property real percentage: 0
@@ -45,7 +46,8 @@ QtObject {
         property int percent: -1
         property string deviceName: "Mouse"
         property int chargeState: MouseBatteryViewModel.ChargeState.Discharging
-        property real durationSeconds: 0
+        property real secondsUntilEmpty: 0
+        property real secondsUntilFull: 0
         property bool isLow: false
     }
 
@@ -65,7 +67,8 @@ QtObject {
             : MouseBatteryViewModel.ChargeState.Discharging
         // qmlformat on
 
-        durationSeconds: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : device.timeToFull
+        secondsUntilEmpty: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : 0
+        secondsUntilFull: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? 0 : device.timeToFull
         isLow: chargeState === MouseBatteryViewModel.ChargeState.Discharging && percent <= lowBatteryPercent
     }
 

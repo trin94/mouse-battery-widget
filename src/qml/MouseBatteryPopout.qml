@@ -89,14 +89,17 @@ PopoutComponent {
         }
 
         StyledText {
-            // qmlformat off
-            text: root.viewModel.isPluggedIn
-                ? I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
-                : I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
-            // qmlformat on
+            text: I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.secondsUntilEmpty))
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
-            visible: root.viewModel.durationSeconds > 0
+            visible: root.viewModel.secondsUntilEmpty > 0
+        }
+
+        StyledText {
+            text: I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.secondsUntilFull))
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.surfaceVariantText
+            visible: root.viewModel.secondsUntilFull > 0
         }
 
         Rectangle {
