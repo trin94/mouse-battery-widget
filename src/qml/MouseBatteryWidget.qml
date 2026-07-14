@@ -41,7 +41,7 @@ PluginComponent {
 
             Item {
                 height: mouseIcon.height
-                width: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
+                width: root.viewModel.shouldShowBolt ? Theme.spacingXS + root.iconSize : 0
                 anchors.verticalCenter: parent.verticalCenter
                 clip: true
 
@@ -52,7 +52,7 @@ PluginComponent {
                     anchors.left: parent.left
                     anchors.leftMargin: Theme.spacingXS
                     anchors.verticalCenter: parent.verticalCenter
-                    opacity: root.viewModel.boltVisible ? 1 : 0
+                    opacity: root.viewModel.shouldShowBolt ? 1 : 0
 
                     Behavior on opacity {
                         NumberAnimation {
@@ -72,7 +72,7 @@ PluginComponent {
 
             Item {
                 height: labelText.implicitHeight
-                width: root.viewModel.labelVisible ? Theme.spacingXS + labelText.implicitWidth : 0
+                width: root.viewModel.shouldShowLabel ? Theme.spacingXS + labelText.implicitWidth : 0
                 anchors.verticalCenter: parent.verticalCenter
                 clip: true
 
@@ -110,7 +110,7 @@ PluginComponent {
 
             Item {
                 width: mouseIconV.width
-                height: root.viewModel.boltVisible ? Theme.spacingXS + root.iconSize : 0
+                height: root.viewModel.shouldShowBolt ? Theme.spacingXS + root.iconSize : 0
                 anchors.horizontalCenter: parent.horizontalCenter
                 clip: true
 
@@ -121,7 +121,7 @@ PluginComponent {
                     anchors.top: parent.top
                     anchors.topMargin: Theme.spacingXS
                     anchors.horizontalCenter: parent.horizontalCenter
-                    opacity: root.viewModel.boltVisible ? 1 : 0
+                    opacity: root.viewModel.shouldShowBolt ? 1 : 0
 
                     Behavior on opacity {
                         NumberAnimation {
@@ -141,7 +141,7 @@ PluginComponent {
 
             Item {
                 width: labelTextV.implicitWidth
-                height: root.viewModel.labelVisible ? Theme.spacingXS + labelTextV.implicitHeight : 0
+                height: root.viewModel.shouldShowLabel ? Theme.spacingXS + labelTextV.implicitHeight : 0
                 anchors.horizontalCenter: parent.horizontalCenter
                 clip: true
 
