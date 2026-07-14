@@ -43,10 +43,6 @@ DEFAULT_PERCENTAGE = 100.0
 NO_DATA_PERCENT = -1
 LOW_BATTERY_PERCENTAGE = 20.0
 
-CHARGE_DISCHARGING = "discharging"
-CHARGE_CHARGING = "charging"
-CHARGE_FULLY_CHARGED = "fully-charged"
-
 
 @pytest.fixture
 def mock() -> Iterator[UPowerMock]:
@@ -182,7 +178,8 @@ def test_discharging_mouse_is_shown(mouse: str, make_view_model: MakeViewModel) 
     assert state["label"] == "100%"
     assert state["deviceName"] == "Test Mouse"
     assert state["level"] == pytest.approx(DEFAULT_PERCENTAGE / 100)
-    assert state["chargeState"] == CHARGE_DISCHARGING
+    assert not state["isPluggedIn"]
+    assert not state["isFullyCharged"]
     assert not state["isLow"]
     assert not state["boltVisible"]
     assert state["labelVisible"]
@@ -207,7 +204,7 @@ def test_property_updates_propagate(mock: UPowerMock, mouse: str, make_view_mode
 
     state = vm.wait_state(lambda s: s["percent"] == percentage)
     assert state["boltVisible"]
-    assert state["chargeState"] == CHARGE_CHARGING
+    assert state["isPluggedIn"]
     assert not state["isLow"]
 
 
@@ -247,8 +244,9 @@ def test_charging_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model
 
     vm = make_view_model()
 
-    state = vm.wait_state(lambda s: s["percent"] == percentage and s["chargeState"] == CHARGE_CHARGING)
+    state = vm.wait_state(lambda s: s["percent"] == percentage and s["isPluggedIn"])
     assert state["boltVisible"]
+    assert not state["isFullyCharged"]
 
 
 def test_charging_mouse_shows_time_until_full(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -278,7 +276,8 @@ def test_fully_charged_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_
     vm = make_view_model()
 
     state = vm.wait_state(itemgetter("boltVisible"))
-    assert state["chargeState"] == CHARGE_FULLY_CHARGED
+    assert state["isFullyCharged"]
+    assert state["isPluggedIn"]
 
 
 def test_bolt_stays_hidden_when_disabled(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -286,7 +285,7 @@ def test_bolt_stays_hidden_when_disabled(mock: UPowerMock, mouse: str, make_view
 
     vm = make_view_model(showBolt=False)
 
-    state = vm.wait_state(lambda s: s["chargeState"] == CHARGE_CHARGING)
+    state = vm.wait_state(itemgetter("isPluggedIn"))
     assert not state["boltVisible"]
 
 
@@ -333,7 +332,7 @@ def test_removed_mouse_keeps_last_reading(mock: UPowerMock, mouse: str, make_vie
     assert state["deviceName"] == "Test Mouse"
     assert state["percent"] == percentage
     assert state["level"] == pytest.approx(percentage / 100)
-    assert state["chargeState"] == CHARGE_DISCHARGING
+    assert not state["isPluggedIn"]
     assert not state["boltVisible"]
     assert state["labelVisible"]
 

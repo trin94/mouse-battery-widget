@@ -49,7 +49,7 @@ PopoutComponent {
             // qmlformat off
             to: root.viewModel.isStale ? Theme.surfaceVariantText
                 : root.viewModel.isLow ? Theme.error
-                : root.viewModel.chargeState !== "discharging" ? Theme.primary
+                : root.viewModel.isPluggedIn ? Theme.primary
                 : Theme.surfaceText
             // qmlformat on
         }
@@ -76,8 +76,8 @@ PopoutComponent {
 
             StyledText {
                 // qmlformat off
-                text: root.viewModel.chargeState === "fully-charged" ? I18n.tr("Fully charged")
-                    : root.viewModel.chargeState === "charging" ? I18n.tr("Charging")
+                text: root.viewModel.isFullyCharged ? I18n.tr("Fully charged")
+                    : root.viewModel.isPluggedIn ? I18n.tr("Charging")
                     : I18n.tr("Discharging")
                 // qmlformat on
                 font.pixelSize: Theme.fontSizeLarge
@@ -90,9 +90,9 @@ PopoutComponent {
 
         StyledText {
             // qmlformat off
-            text: root.viewModel.chargeState === "discharging"
-                ? I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
-                : I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
+            text: root.viewModel.isPluggedIn
+                ? I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
+                : I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.durationSeconds))
             // qmlformat on
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
