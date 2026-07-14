@@ -11,24 +11,56 @@ import Quickshell.Services.UPower
 QtObject {
     id: vm
 
+    // User setting: show the percentage label in the bar.
     required property bool showPercentage
+
+    // User setting: show the charging bolt in the bar.
     required property bool showBolt
 
+    // A valid battery reading is coming in right now.
     readonly property bool isLive: _private.current.isLive
+
+    // The mouse stopped reporting and the shown values are its frozen last reading.
     readonly property bool isStale: _private.current.isStale
+
+    // There is something to show, either live or stale.
     readonly property bool hasData: _private.current.hasData
+
+    // UPower lists a mouse device at all, whatever its state.
     readonly property bool isMouseDetected: UPower.devices.values.some(d => d.type === UPowerDeviceType.Mouse)
+
+    // Battery level from 0 to 1, frozen at the last reading while stale.
     readonly property real level: _private.current.level
+
+    // Battery level from 0 to 100, or -1 before the first reading.
     readonly property int percent: _private.current.percent
-    readonly property bool isPluggedIn: _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
-    readonly property bool isFullyCharged: _private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged
-    readonly property bool isLow: _private.current.isLow
-    readonly property bool shouldShowBolt: showBolt && isPluggedIn
-    readonly property bool shouldShowLabel: showPercentage && hasData
+
+    // Display text for the percentage, empty before the first reading.
     readonly property string label: hasData ? percent + "%" : ""
+
+    // Product name of the mouse, "Mouse" if unknown.
     readonly property string deviceName: _private.current.deviceName
+
+    // The mouse is charging or sits fully charged on the cable.
+    readonly property bool isPluggedIn: _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
+
+    // The mouse is plugged in and the battery is full.
+    readonly property bool isFullyCharged: _private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged
+
+    // A live, discharging battery is at or below the low threshold.
+    readonly property bool isLow: _private.current.isLow
+
+    // Estimated seconds until empty, 0 unless live, discharging, and UPower provides an estimate.
     readonly property real secondsUntilEmpty: _private.current.secondsUntilEmpty
+
+    // Estimated seconds until full, 0 unless live, charging, and UPower provides an estimate.
     readonly property real secondsUntilFull: _private.current.secondsUntilFull
+
+    // The bar should render the percentage label.
+    readonly property bool shouldShowLabel: showPercentage && hasData
+
+    // The bar should render the charging bolt.
+    readonly property bool shouldShowBolt: showBolt && isPluggedIn
 
     component NullDevice: QtObject {
         readonly property real percentage: 0
