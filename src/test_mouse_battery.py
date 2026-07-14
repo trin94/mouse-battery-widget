@@ -183,7 +183,8 @@ def test_discharging_mouse_is_shown(mouse: str, make_view_model: MakeViewModel) 
     assert not state["isLow"]
     assert not state["shouldShowBolt"]
     assert state["shouldShowLabel"]
-    assert not state["durationSeconds"]
+    assert not state["secondsUntilEmpty"]
+    assert not state["secondsUntilFull"]
 
 
 def test_mouse_without_model_gets_fallback_name(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -235,7 +236,8 @@ def test_discharging_mouse_shows_time_remaining(mock: UPowerMock, mouse: str, ma
     vm = make_view_model()
 
     state = vm.wait_state(itemgetter("isLive"))
-    assert state["durationSeconds"] == time_to_empty
+    assert state["secondsUntilEmpty"] == time_to_empty
+    assert not state["secondsUntilFull"]
 
 
 def test_charging_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -256,7 +258,8 @@ def test_charging_mouse_shows_time_until_full(mock: UPowerMock, mouse: str, make
     vm = make_view_model()
 
     state = vm.wait_state(itemgetter("isLive"))
-    assert state["durationSeconds"] == time_to_full
+    assert state["secondsUntilFull"] == time_to_full
+    assert not state["secondsUntilEmpty"]
 
 
 def test_charging_mouse_without_estimate_has_no_duration(
@@ -267,7 +270,8 @@ def test_charging_mouse_without_estimate_has_no_duration(
     vm = make_view_model()
 
     state = vm.wait_state(itemgetter("isLive"))
-    assert not state["durationSeconds"]
+    assert not state["secondsUntilEmpty"]
+    assert not state["secondsUntilFull"]
 
 
 def test_fully_charged_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
