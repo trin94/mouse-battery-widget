@@ -14,7 +14,7 @@ PluginComponent {
     id: root
 
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
-    readonly property color contentColor: viewModel.isReporting ? Theme.surfaceText : Theme.surfaceTextSecondary
+    readonly property color contentColor: viewModel.isLive ? Theme.surfaceText : Theme.surfaceTextSecondary
 
     readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
         showPercentage: root.pluginData?.showPercentage ?? true

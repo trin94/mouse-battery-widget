@@ -14,57 +14,96 @@ QtObject {
     required property bool showPercentage
     required property bool showBolt
 
-    readonly property bool isReporting: _private.mouse !== null
+    readonly property bool isLive: _private.current.isLive
+    readonly property bool isStale: _private.current.isStale
+    readonly property bool hasData: _private.current.hasData
     readonly property bool isMouseDetected: UPower.devices.values.some(d => d.type === UPowerDeviceType.Mouse)
-    readonly property bool hasData: isReporting || _private.hasLastReading
-    readonly property bool isStale: hasData && !isReporting
-    readonly property real level: isReporting ? _private.mouse.percentage : _private.lastLevel
-    readonly property int percent: hasData ? Math.round(level * 100) : -1
-
-    // qmlformat off
-    readonly property bool isPluggedIn: isReporting
-        && (_private.mouse.state === UPowerDeviceState.Charging
-            || _private.mouse.state === UPowerDeviceState.FullyCharged)
-    // qmlformat on
-
-    readonly property bool isFullyCharged: isReporting && _private.mouse.state === UPowerDeviceState.FullyCharged
-    readonly property bool isLow: isReporting && !isPluggedIn && percent <= _private.lowBatteryPercent
-
-    readonly property bool boltVisible: isPluggedIn && showBolt
+    readonly property real level: _private.current.level
+    readonly property int percent: _private.current.percent
+    readonly property string chargeState: _private.current.chargeState
+    readonly property bool isLow: _private.current.isLow
+    readonly property bool boltVisible: chargeState !== "discharging" && showBolt
     readonly property bool labelVisible: showPercentage && hasData
     readonly property string label: hasData ? percent + "%" : ""
+    readonly property string deviceName: _private.current.deviceName
+    readonly property real durationSeconds: _private.current.durationSeconds
 
-    readonly property string deviceName: (isReporting ? _private.mouse.model : _private.lastName) || "Mouse"
-
-    readonly property real durationSeconds: {
-        if (!isReporting)
-            return 0;
-        return isPluggedIn ? _private.mouse.timeToFull : _private.mouse.timeToEmpty;
+    component NullDevice: QtObject {
+        readonly property real percentage: 0
+        readonly property string model: ""
+        readonly property int state: UPowerDeviceState.Unknown
+        readonly property real timeToEmpty: 0
+        readonly property real timeToFull: 0
     }
 
-    readonly property QtObject _private: QtObject {
+    component DisplayState: QtObject {
+        property bool isLive: false
+        property bool isStale: false
+        readonly property bool hasData: isLive || isStale
+        property real level: 0
+        property int percent: -1
+        property string deviceName: "Mouse"
+        property string chargeState: "discharging"
+        property real durationSeconds: 0
+        property bool isLow: false
+    }
+
+    component LiveState: DisplayState {
+        required property QtObject device
+
         readonly property int lowBatteryPercent: 20
 
+        isLive: true
+        level: device.percentage
+        percent: Math.round(level * 100)
+        deviceName: device.model || "Mouse"
+
         // qmlformat off
+        chargeState: device.state === UPowerDeviceState.FullyCharged ? "fully-charged"
+            : device.state === UPowerDeviceState.Charging ? "charging"
+            : "discharging"
+        // qmlformat on
+
+        durationSeconds: chargeState === "discharging" ? device.timeToEmpty : device.timeToFull
+        isLow: chargeState === "discharging" && percent <= lowBatteryPercent
+    }
+
+    component StaleState: DisplayState {
+        required property var reading
+
+        isStale: true
+        level: reading.level
+        percent: Math.round(reading.level * 100)
+        deviceName: reading.name || "Mouse"
+    }
+
+    // qmlformat off
+    readonly property QtObject _private: QtObject {
+        id: priv
+
         readonly property UPowerDevice mouse: UPower.devices.values.find(d => d.ready
             && d.type === UPowerDeviceType.Mouse
             && d.state !== UPowerDeviceState.Unknown) ?? null
-        // qmlformat on
 
-        property bool hasLastReading: false
-        property real lastLevel: 0
-        property string lastName: ""
+        readonly property NullDevice nullDevice: NullDevice {}
+
+        readonly property DisplayState noData: DisplayState {}
+        readonly property LiveState live: LiveState { device: priv.mouse ?? priv.nullDevice }
+        readonly property StaleState stale: StaleState { reading: priv.lastReading }
+
+        readonly property DisplayState current: mouse ? live : lastReading.valid ? stale : noData
+
+        property var lastReading: ({ valid: false, level: 0, name: "" })
 
         function captureReading() {
-            if (!vm.isReporting)
+            if (!vm.isLive)
                 return;
-            hasLastReading = true;
-            lastLevel = vm.level;
-            lastName = vm.deviceName;
+            lastReading = { valid: true, level: vm.level, name: vm.deviceName };
         }
     }
+    // qmlformat on
 
-    onIsReportingChanged: _private.captureReading()
+    onIsLiveChanged: _private.captureReading()
     onLevelChanged: _private.captureReading()
     onDeviceNameChanged: _private.captureReading()
 
