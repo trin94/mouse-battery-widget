@@ -9,7 +9,7 @@ import QtQuick
 import Quickshell.Services.UPower
 
 QtObject {
-    id: vm
+    id: root
 
     // User setting: show the percentage label in the bar.
     required property bool showPercentage
@@ -132,9 +132,9 @@ QtObject {
         property var lastReading: ({ valid: false, level: 0, name: "" })
 
         function captureReading() {
-            if (!vm.isLive)
+            if (!root.isLive)
                 return;
-            lastReading = { valid: true, level: vm.level, name: vm.deviceName };
+            lastReading = { valid: true, level: root.level, name: root.deviceName };
         }
     }
     // qmlformat on
