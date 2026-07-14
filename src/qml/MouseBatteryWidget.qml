@@ -14,6 +14,7 @@ PluginComponent {
     id: root
 
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
+    readonly property color contentColor: viewModel.hasMouse ? Theme.surfaceText : Theme.surfaceTextSecondary
 
     readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
         showPercentage: root.pluginData?.showPercentage ?? true
@@ -34,7 +35,7 @@ PluginComponent {
                 id: mouseIcon
                 name: "mouse"
                 size: root.iconSize
-                color: Theme.surfaceText
+                color: root.contentColor
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -79,7 +80,7 @@ PluginComponent {
                     id: labelText
                     text: root.viewModel.label
                     font.pixelSize: root.textSize
-                    color: Theme.surfaceText
+                    color: root.contentColor
                     anchors.left: parent.left
                     anchors.leftMargin: Theme.spacingXS
                     anchors.verticalCenter: parent.verticalCenter
@@ -103,7 +104,7 @@ PluginComponent {
                 id: mouseIconV
                 name: "mouse"
                 size: root.iconSize
-                color: Theme.surfaceText
+                color: root.contentColor
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
@@ -148,7 +149,7 @@ PluginComponent {
                     id: labelTextV
                     text: root.viewModel.label
                     font.pixelSize: root.textSize
-                    color: Theme.surfaceText
+                    color: root.contentColor
                     anchors.top: parent.top
                     anchors.topMargin: Theme.spacingXS
                     anchors.horizontalCenter: parent.horizontalCenter

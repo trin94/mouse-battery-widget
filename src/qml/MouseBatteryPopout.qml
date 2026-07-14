@@ -16,7 +16,13 @@ PopoutComponent {
     required property MouseBatteryViewModel viewModel
 
     headerText: viewModel.deviceName
-    detailsText: viewModel.hasMouse ? "" : I18n.tr("Connect a mouse to see its battery level.")
+
+    // qmlformat off
+    detailsText: viewModel.hasMouse ? ""
+        : viewModel.isMouseDetected ? I18n.tr("No recent battery data. Waiting for the mouse to report.")
+        : I18n.tr("No supported mouse detected.")
+    // qmlformat on
+
     showCloseButton: true
 
     Column {
@@ -29,16 +35,27 @@ PopoutComponent {
         width: parent.width - Theme.spacingS * 2
         bottomPadding: Theme.spacingS
         spacing: Theme.spacingS
-        visible: root.viewModel.hasMouse
+        visible: root.viewModel.hasData
 
         DankColorAnimation {
             id: stateColorAnimation
-            to: root.viewModel.isLow ? Theme.error : root.viewModel.isCharging ? Theme.primary : Theme.surfaceText
+
+            // qmlformat off
+            to: root.viewModel.isStale ? Theme.surfaceVariantText
+                : root.viewModel.isLow ? Theme.error
+                : root.viewModel.isCharging ? Theme.primary
+                : Theme.surfaceText
+            // qmlformat on
         }
 
         DankColorAnimation {
             id: barColorAnimation
-            to: root.viewModel.isLow ? Theme.error : Theme.primary
+
+            // qmlformat off
+            to: root.viewModel.isStale ? Theme.withAlpha(Theme.primary, 0.4)
+                : root.viewModel.isLow ? Theme.error
+                : Theme.primary
+            // qmlformat on
         }
 
         Row {
