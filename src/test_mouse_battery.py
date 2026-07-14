@@ -98,7 +98,7 @@ def test_no_readings_yet_shows_empty_state(make_view_model: MakeViewModel) -> No
     assert not state["isStale"]
     assert not state["isMouseDetected"]
     assert not state["label"]
-    assert not state["labelVisible"]
+    assert not state["shouldShowLabel"]
     assert state["deviceName"] == "Mouse"
     assert state["percent"] == NO_DATA_PERCENT
     assert state["level"] == 0
@@ -181,8 +181,8 @@ def test_discharging_mouse_is_shown(mouse: str, make_view_model: MakeViewModel) 
     assert not state["isPluggedIn"]
     assert not state["isFullyCharged"]
     assert not state["isLow"]
-    assert not state["boltVisible"]
-    assert state["labelVisible"]
+    assert not state["shouldShowBolt"]
+    assert state["shouldShowLabel"]
     assert not state["durationSeconds"]
 
 
@@ -203,7 +203,7 @@ def test_property_updates_propagate(mock: UPowerMock, mouse: str, make_view_mode
     mock.update_device(mouse, Percentage=percentage, State=STATE_CHARGING)
 
     state = vm.wait_state(lambda s: s["percent"] == percentage)
-    assert state["boltVisible"]
+    assert state["shouldShowBolt"]
     assert state["isPluggedIn"]
     assert not state["isLow"]
 
@@ -245,7 +245,7 @@ def test_charging_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_model
     vm = make_view_model()
 
     state = vm.wait_state(lambda s: s["percent"] == percentage and s["isPluggedIn"])
-    assert state["boltVisible"]
+    assert state["shouldShowBolt"]
     assert not state["isFullyCharged"]
 
 
@@ -275,7 +275,7 @@ def test_fully_charged_mouse_shows_bolt(mock: UPowerMock, mouse: str, make_view_
 
     vm = make_view_model()
 
-    state = vm.wait_state(itemgetter("boltVisible"))
+    state = vm.wait_state(itemgetter("shouldShowBolt"))
     assert state["isFullyCharged"]
     assert state["isPluggedIn"]
 
@@ -286,14 +286,14 @@ def test_bolt_stays_hidden_when_disabled(mock: UPowerMock, mouse: str, make_view
     vm = make_view_model(showBolt=False)
 
     state = vm.wait_state(itemgetter("isPluggedIn"))
-    assert not state["boltVisible"]
+    assert not state["shouldShowBolt"]
 
 
 def test_label_stays_hidden_when_percentage_disabled(mouse: str, make_view_model: MakeViewModel) -> None:
     vm = make_view_model(showPercentage=False)
 
     state = vm.wait_state(itemgetter("isLive"))
-    assert not state["labelVisible"]
+    assert not state["shouldShowLabel"]
 
 
 def test_mouse_turning_unknown_keeps_last_reading(mock: UPowerMock, mouse: str, make_view_model: MakeViewModel) -> None:
@@ -333,8 +333,8 @@ def test_removed_mouse_keeps_last_reading(mock: UPowerMock, mouse: str, make_vie
     assert state["percent"] == percentage
     assert state["level"] == pytest.approx(percentage / 100)
     assert not state["isPluggedIn"]
-    assert not state["boltVisible"]
-    assert state["labelVisible"]
+    assert not state["shouldShowBolt"]
+    assert state["shouldShowLabel"]
 
 
 def test_returning_mouse_replaces_stale_reading(

@@ -23,8 +23,8 @@ QtObject {
     readonly property bool isPluggedIn: _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
     readonly property bool isFullyCharged: _private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged
     readonly property bool isLow: _private.current.isLow
-    readonly property bool boltVisible: isPluggedIn && showBolt
-    readonly property bool labelVisible: showPercentage && hasData
+    readonly property bool shouldShowBolt: showBolt && isPluggedIn
+    readonly property bool shouldShowLabel: showPercentage && hasData
     readonly property string label: hasData ? percent + "%" : ""
     readonly property string deviceName: _private.current.deviceName
     readonly property real durationSeconds: _private.current.durationSeconds
