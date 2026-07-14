@@ -26,7 +26,7 @@ from harness import UPowerMock
 PREVIEW_DIR = Path(__file__).resolve().parent / "preview"
 
 CONTROL_NAME = "io.github.trin94.MouseBatteryWidget.Mock"
-STATES = {"charging": 1, "discharging": 2, "full": 4}
+STATES = {"unknown": 0, "charging": 1, "discharging": 2, "full": 4}
 
 MOUSE_TYPE = 5
 DEVICE_NAME = "mock_mouse"
