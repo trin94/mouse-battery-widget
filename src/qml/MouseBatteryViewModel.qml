@@ -14,67 +14,59 @@ QtObject {
     required property bool showPercentage
     required property bool showBolt
 
-    readonly property int lowBatteryPercent: 20
-
-    // qmlformat off
-    readonly property UPowerDevice mouse: UPower.devices.values.find(d => d.ready
-        && d.type === UPowerDeviceType.Mouse
-        && d.state !== UPowerDeviceState.Unknown) ?? null
-    // qmlformat on
-
-    readonly property bool hasMouse: mouse !== null
+    readonly property bool isReporting: _private.mouse !== null
     readonly property bool isMouseDetected: UPower.devices.values.some(d => d.type === UPowerDeviceType.Mouse)
-    readonly property bool hasData: hasMouse || _lastReading.percent >= 0
-    readonly property bool isStale: hasData && !hasMouse
-    readonly property int percent: hasMouse ? Math.round(mouse.percentage * 100) : _lastReading.percent
-    readonly property real level: hasMouse ? mouse.percentage : _lastReading.level
+    readonly property bool hasData: isReporting || _private.hasLastReading
+    readonly property bool isStale: hasData && !isReporting
+    readonly property real level: isReporting ? _private.mouse.percentage : _private.lastLevel
+    readonly property int percent: hasData ? Math.round(level * 100) : -1
 
     // qmlformat off
-    readonly property bool isCharging: hasMouse
-        && (mouse.state === UPowerDeviceState.Charging
-            || mouse.state === UPowerDeviceState.FullyCharged)
+    readonly property bool isPluggedIn: isReporting
+        && (_private.mouse.state === UPowerDeviceState.Charging
+            || _private.mouse.state === UPowerDeviceState.FullyCharged)
     // qmlformat on
 
-    readonly property bool isLow: hasMouse && !isCharging && percent <= lowBatteryPercent
+    readonly property bool isFullyCharged: isReporting && _private.mouse.state === UPowerDeviceState.FullyCharged
+    readonly property bool isLow: isReporting && !isPluggedIn && percent <= _private.lowBatteryPercent
 
-    readonly property bool boltVisible: isCharging && showBolt
+    readonly property bool boltVisible: isPluggedIn && showBolt
     readonly property bool labelVisible: showPercentage && hasData
     readonly property string label: hasData ? percent + "%" : ""
 
-    readonly property string deviceName: hasMouse ? (mouse.model || "Mouse") : (_lastReading.name || "Mouse")
-    readonly property string stateText: hasMouse ? UPowerDeviceState.toString(mouse.state) : ""
+    readonly property string deviceName: (isReporting ? _private.mouse.model : _private.lastName) || "Mouse"
 
-    readonly property string durationText: {
-        if (!hasMouse)
-            return "";
-        if (isCharging)
-            return mouse.timeToFull > 0 ? formatDuration(mouse.timeToFull) : "";
-        return mouse.timeToEmpty > 0 ? formatDuration(mouse.timeToEmpty) : "";
+    readonly property real durationSeconds: {
+        if (!isReporting)
+            return 0;
+        return isPluggedIn ? _private.mouse.timeToFull : _private.mouse.timeToEmpty;
     }
 
-    readonly property QtObject _lastReading: QtObject {
-        property int percent: -1
-        property real level: 0
-        property string name: ""
+    readonly property QtObject _private: QtObject {
+        readonly property int lowBatteryPercent: 20
+
+        // qmlformat off
+        readonly property UPowerDevice mouse: UPower.devices.values.find(d => d.ready
+            && d.type === UPowerDeviceType.Mouse
+            && d.state !== UPowerDeviceState.Unknown) ?? null
+        // qmlformat on
+
+        property bool hasLastReading: false
+        property real lastLevel: 0
+        property string lastName: ""
+
+        function captureReading() {
+            if (!vm.isReporting)
+                return;
+            hasLastReading = true;
+            lastLevel = vm.level;
+            lastName = vm.deviceName;
+        }
     }
 
-    function formatDuration(seconds: real): string {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
-    }
+    onIsReportingChanged: _private.captureReading()
+    onLevelChanged: _private.captureReading()
+    onDeviceNameChanged: _private.captureReading()
 
-    function _captureReading() {
-        if (!hasMouse)
-            return;
-        _lastReading.percent = percent;
-        _lastReading.level = level;
-        _lastReading.name = deviceName;
-    }
-
-    onMouseChanged: _captureReading()
-    onLevelChanged: _captureReading()
-    onDeviceNameChanged: _captureReading()
-
-    Component.onCompleted: _captureReading()
+    Component.onCompleted: _private.captureReading()
 }
