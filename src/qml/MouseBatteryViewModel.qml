@@ -20,9 +20,10 @@ QtObject {
     readonly property bool isMouseDetected: UPower.devices.values.some(d => d.type === UPowerDeviceType.Mouse)
     readonly property real level: _private.current.level
     readonly property int percent: _private.current.percent
-    readonly property string chargeState: _private.current.chargeState
+    readonly property bool isPluggedIn: _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
+    readonly property bool isFullyCharged: _private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged
     readonly property bool isLow: _private.current.isLow
-    readonly property bool boltVisible: chargeState !== "discharging" && showBolt
+    readonly property bool boltVisible: isPluggedIn && showBolt
     readonly property bool labelVisible: showPercentage && hasData
     readonly property string label: hasData ? percent + "%" : ""
     readonly property string deviceName: _private.current.deviceName
@@ -43,7 +44,7 @@ QtObject {
         property real level: 0
         property int percent: -1
         property string deviceName: "Mouse"
-        property string chargeState: "discharging"
+        property int chargeState: MouseBatteryViewModel.ChargeState.Discharging
         property real durationSeconds: 0
         property bool isLow: false
     }
@@ -59,13 +60,13 @@ QtObject {
         deviceName: device.model || "Mouse"
 
         // qmlformat off
-        chargeState: device.state === UPowerDeviceState.FullyCharged ? "fully-charged"
-            : device.state === UPowerDeviceState.Charging ? "charging"
-            : "discharging"
+        chargeState: device.state === UPowerDeviceState.FullyCharged ? MouseBatteryViewModel.ChargeState.FullyCharged
+            : device.state === UPowerDeviceState.Charging ? MouseBatteryViewModel.ChargeState.Charging
+            : MouseBatteryViewModel.ChargeState.Discharging
         // qmlformat on
 
-        durationSeconds: chargeState === "discharging" ? device.timeToEmpty : device.timeToFull
-        isLow: chargeState === "discharging" && percent <= lowBatteryPercent
+        durationSeconds: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : device.timeToFull
+        isLow: chargeState === MouseBatteryViewModel.ChargeState.Discharging && percent <= lowBatteryPercent
     }
 
     component StaleState: DisplayState {
@@ -102,6 +103,12 @@ QtObject {
         }
     }
     // qmlformat on
+
+    enum ChargeState {
+        Discharging,
+        Charging,
+        FullyCharged
+    }
 
     onIsLiveChanged: _private.captureReading()
     onLevelChanged: _private.captureReading()
