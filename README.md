@@ -48,10 +48,9 @@ ln -s "$PWD" ~/.config/DankMaterialShell/plugins/mouse-battery-widget
 Set up the dev environment per the official
 [plugin development guide](https://danklinux.com/docs/dankmaterialshell/plugin-development#development-environment),
 with one change: this is a standalone repo, so don't create a directory under
-`dms-plugins/`. Editor support needs no manual setup: `just fmt` generates a
-git-ignored `.qmlls.ini` plus the import shims it points at, so both the
-qmllint hook and qmlls in your editor resolve the `qs.*` modules of the
-installed DMS.
+`dms-plugins/`.
+
+Instead, clone the repo into a directory of your choice, then run `just init`.
 
 Required tools:
 
@@ -64,7 +63,7 @@ Required tools:
 The most important recipes (run `just` for the full list):
 
 ```sh
-just init        # Set up the Python environment
+just init        # Set up the development environment
 just fmt         # Run all formatting and lint hooks
 just test        # Run the system tests
 just reload      # Reload the plugin after making changes
