@@ -135,6 +135,20 @@ hooks = [
 ]
 
 [[repos]]
+repo = "local"
+hooks = [
+    {
+        id = "qmllint",
+        name = "lint qml",
+        entry = "uv run src/lint_qml.py",
+        language = "system",
+        files = '\.qml$',
+        exclude = "^src/mock/preview/",
+        require_serial = true,
+    },
+]
+
+[[repos]]
 repo = "https://github.com/fsfe/reuse-tool"
 rev = "v6.2.0"
 hooks = [
