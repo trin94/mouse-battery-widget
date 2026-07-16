@@ -126,7 +126,7 @@ extend-select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["harness", "upower_service"]
+known-first-party = ["harness", "qml_tooling", "upower_service"]
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "SPDX-FileCopyrightText: Elias Mueller"

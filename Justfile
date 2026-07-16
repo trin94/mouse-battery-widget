@@ -16,10 +16,11 @@ mod mock 'src/mock'
 @default:
     just --list --unsorted
 
-# Set up the Python environment
+# Set up the development environment
 [group('dev')]
 init:
     uv sync
+    uv run src/qml_tooling.py
 
 # Run all formatting and lint hooks
 [group('dev')]
