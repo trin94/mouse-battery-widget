@@ -84,7 +84,7 @@ QtObject {
     }
 
     component LiveState: DisplayState {
-        required property QtObject device
+        required property var device
 
         readonly property int lowBatteryPercent: 20
 
@@ -114,7 +114,7 @@ QtObject {
     }
 
     // qmlformat off
-    readonly property QtObject _private: QtObject {
+    component Private: QtObject {
         id: priv
 
         readonly property UPowerDevice mouse: UPower.devices.values.find(d => d.ready
@@ -138,6 +138,8 @@ QtObject {
         }
     }
     // qmlformat on
+
+    readonly property Private _private: Private {}
 
     enum ChargeState {
         Discharging,
