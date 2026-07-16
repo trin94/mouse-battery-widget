@@ -105,6 +105,11 @@ extend-select = [
     "S607",
 ]
 
+"**/lint_qml.py" = [
+    "S404",           # Spawning qmllint is the script's job
+    "S603",
+]
+
 "**/mock/serve.py" = [
     "ANN",              # dbus-fast requires D-Bus signature strings as annotations
     "F821",             # D-Bus signature strings look like undefined names

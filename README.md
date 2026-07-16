@@ -48,12 +48,10 @@ ln -s "$PWD" ~/.config/DankMaterialShell/plugins/mouse-battery-widget
 Set up the dev environment per the official
 [plugin development guide](https://danklinux.com/docs/dankmaterialshell/plugin-development#development-environment),
 with one change: this is a standalone repo, so don't create a directory under
-`dms-plugins/`. Instead, symlink DMS's qmlls config into the repo (git-ignored)
-and open your editor here:
-
-```sh
-ln -s /path/to/DankMaterialShell/quickshell/.qmlls.ini .qmlls.ini
-```
+`dms-plugins/`. Editor support needs no manual setup: `just fmt` generates a
+git-ignored `.qmlls.ini` plus the import shims it points at, so both the
+qmllint hook and qmlls in your editor resolve the `qs.*` modules of the
+installed DMS.
 
 Required tools:
 
