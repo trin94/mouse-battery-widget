@@ -6,8 +6,7 @@
 
 Regenerates the import shims and .qmlls.ini via qml_tooling, then
 runs qmllint against them. Invoked by prek with the QML files to
-check. Exits successfully when DMS or qmllint is not installed, like
-on the lint CI runner.
+check. Fails when DMS or qmllint is missing.
 """
 
 import shutil
@@ -39,13 +38,13 @@ def main(files: list[str]) -> int:
 
     dms_root = qml_tooling.find_dms_root()
     if dms_root is None:
-        sys.stderr.write("qmllint skipped: no DMS installation found\n")
-        return 0
+        sys.stderr.write("error: no DMS installation found\n")
+        return 1
 
     qmllint = find_qmllint()
     if qmllint is None:
-        sys.stderr.write("qmllint skipped: no qmllint executable found\n")
-        return 0
+        sys.stderr.write("error: no qmllint executable found\n")
+        return 1
 
     qml_tooling.generate(dms_root)
 

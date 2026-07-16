@@ -8,8 +8,8 @@ Quickshell resolves qs.* modules at runtime without qmldir files, so
 qmllint and qmlls cannot see them on their own. This script mirrors
 the installed DMS tree into a git-ignored import directory with
 generated qmldir files and refreshes .qmlls.ini to point there. Run
-by just init and reused by the qmllint hook. Exits successfully when
-DMS is not installed, like on the lint CI runner.
+by just init and reused by the qmllint hook. Fails when DMS is not
+installed.
 """
 
 import re
@@ -96,8 +96,8 @@ def generate(dms_root: Path) -> None:
 def main() -> int:
     dms_root = find_dms_root()
     if dms_root is None:
-        sys.stderr.write("qml tooling skipped: no DMS installation found\n")
-        return 0
+        sys.stderr.write("error: no DMS installation found\n")
+        return 1
     generate(dms_root)
     return 0
 
