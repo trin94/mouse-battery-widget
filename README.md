@@ -57,7 +57,7 @@ Required tools:
 
 - [just](https://github.com/casey/just) runs the development tasks.
 - [uv](https://docs.astral.sh/uv/) manages the Python environment and installs all dev dependencies itself.
-- `dbus-daemon` hosts the private bus the tests fake UPower on.
+- `dbus-daemon` hosts the private bus the mock bar fakes UPower on.
 - `dms` drives the hot-reload recipes. It comes with Dank Material Shell.
 
 The most important recipes (run `just` for the full list):
@@ -65,16 +65,12 @@ The most important recipes (run `just` for the full list):
 ```sh
 just init        # Set up the development environment
 just fmt         # Run all formatting and lint hooks
-just test        # Run the system tests
-just test-qml    # Run the QML unit tests
+just test        # Run the QML unit tests
 just reload      # Reload the plugin after making changes
 just mock start  # Show the widget in a mock bar with a fake mouse
 ```
 
-`just test` launches the real quickshell binary headless against an in-process fake UPower daemon
-and asserts the derived state over IPC.
-
-`just test-qml` runs the `tst_*.qml` files through Qt Quick Test on a PySide6 engine, with a fake
+`just test` runs the `tst_*.qml` files through Qt Quick Test on a PySide6 engine, with a fake
 `Quickshell.Services.UPower` module registered from Python and driven by a test bridge.
 
 ## License

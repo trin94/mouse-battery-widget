@@ -15,7 +15,6 @@ dev = [
     "prek>=0.4.9",
     "pyrefly>=1.1.1",
     "pyside6-essentials>=6.11.1",
-    "pytest>=9.1.1",
     "ruff>=0.15.21",
 ]
 
@@ -100,8 +99,8 @@ extend-select = [
     "UP037",                # The signature strings must stay quoted strings at runtime
 ]
 
-"**/harness.py" = [
-    "S404",          # Spawning subprocesses is the harness's job
+"**/upower_mock.py" = [
+    "S404",              # Spawning dbus-daemon is the mock's job
     "S603",
     "S607",
 ]
@@ -126,13 +125,8 @@ extend-select = [
     "S607",
 ]
 
-"**/test_*.py" = [
-    "ARG",          # Fixture parameters look like unused arguments
-    "S101",         # Tests are built on `assert`
-]
-
 [tool.ruff.lint.isort]
-known-first-party = ["harness", "qml_test_bridge", "qml_tooling", "upower_fake", "upower_service"]
+known-first-party = ["qml_test_bridge", "qml_tooling", "upower_fake", "upower_mock", "upower_service"]
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "SPDX-FileCopyrightText: Elias Mueller"

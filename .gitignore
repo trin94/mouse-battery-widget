@@ -214,10 +214,9 @@ tags
 # Claude Code local settings
 .claude/
 
-# Python artifacts from the system tests
+# Python artifacts
 /.venv/
 __pycache__/
-.pytest_cache/
 /.rumdl_cache/
 
 # Mock bar: generated symlinks into the installed DMS config

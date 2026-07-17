@@ -15,7 +15,7 @@ from pathlib import Path
 from dbus_fast.aio import MessageBus
 from dbus_fast.service import ServiceInterface, method
 
-from harness import UPowerMock
+from upower_mock import UPowerMock
 
 PREVIEW_DIR = Path(__file__).resolve().parent / "preview"
 

@@ -37,14 +37,9 @@ update-hooks:
 update-dependencies:
     uv sync --upgrade
 
-# Run the system tests
-[group('dev')]
-test *args:
-    uv run src/test_mouse_battery.py {{ args }}
-
 # Run the QML unit tests
 [group('dev')]
-test-qml *args:
+test *args:
     uv run src/qml_test_main.py {{ args }}
 
 # List all plugins and their state

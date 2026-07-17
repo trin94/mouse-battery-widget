@@ -2,20 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Harness for the system tests."""
+"""A fake upowerd serving a private bus."""
 
 import asyncio
-import json
-import os
 import subprocess
-import tempfile
 import threading
-import time
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine, Mapping
+    from collections.abc import Coroutine, Mapping
 
 from dbus_fast.aio import MessageBus
 
@@ -28,19 +23,6 @@ from upower_service import (
     DeviceService,
     RootService,
 )
-
-PROBE_QML = Path(__file__).resolve().parent / "probe.qml"
-
-
-def wait_until[T](probe: Callable[[], T | None], timeout: float = 10.0, interval: float = 0.1) -> T | None:
-    """Poll probe() until it returns a truthy value or the timeout expires."""
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        result = probe()
-        if result:
-            return result
-        time.sleep(interval)
-    return None
 
 
 class UPowerMock:
@@ -139,92 +121,3 @@ class UPowerMock:
         self._root.DeviceRemoved(path)
         self._require_bus().unexport(path)
         del self._devices[path]
-
-
-class ProbeSession:
-    """A headless quickshell instance loading probe.qml on the mock's bus."""
-
-    def __init__(self, mock: UPowerMock) -> None:
-        self._env = mock.client_env(os.environ)
-        self._env["QT_QPA_PLATFORM"] = "offscreen"
-        self._env.pop("WAYLAND_DISPLAY", None)
-        self._env.pop("DISPLAY", None)
-        with tempfile.NamedTemporaryFile(
-            mode="w", prefix="mouse-battery-system-test-", suffix=".log", delete=False, encoding="utf-8"
-        ) as log:
-            self._log_path = log.name
-            self._process = subprocess.Popen(
-                ["qs", "-p", PROBE_QML],
-                env=self._env,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-            )
-
-    @property
-    def log_path(self) -> str:
-        return self._log_path
-
-    def create(self, properties: dict[str, object]) -> None:
-        if wait_until(lambda: self._ipc("ping")) is None:
-            message = f"quickshell IPC did not come up, log: {self.log_path}"
-            raise AssertionError(message)
-        error = self._ipc("create", json.dumps(properties))
-        if error is None or error:
-            message = f"could not create object under test: {error}"
-            raise AssertionError(message)
-
-    def read(self) -> dict | None:
-        output = self._ipc("read")
-        if not output:
-            return None
-        try:
-            return json.loads(output)
-        except json.JSONDecodeError:
-            return None
-
-    def close(self) -> None:
-        self._process.terminate()
-        try:
-            self._process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            self._process.kill()
-
-    def _ipc(self, *args: str) -> str | None:
-        result = subprocess.run(
-            ["qs", "ipc", "--any-display", "--newest", "-p", PROBE_QML, "call", "test", *args],
-            env=self._env,
-            capture_output=True,
-            text=True,
-            timeout=10,
-            check=False,
-        )
-        if result.returncode != 0:
-            return None
-        return result.stdout.strip()
-
-
-class ViewModel:
-    """Handle on a MouseBatteryViewModel instantiated inside the probe."""
-
-    def __init__(self, session: ProbeSession, **properties: object) -> None:
-        self._session = session
-        session.create(properties)
-
-    def state(self) -> dict | None:
-        return self._session.read()
-
-    def wait_state(self, predicate: Callable[[dict], object], timeout: float = 10.0) -> dict:
-        def probe() -> dict | None:
-            state = self.state()
-            if state is not None and predicate(state):
-                return state
-            return None
-
-        state = wait_until(probe, timeout)
-        if state is None:
-            message = f"view model state did not settle within {timeout}s, quickshell log: {self._session.log_path}"
-            raise AssertionError(message)
-        return state
-
-    def wait_ready(self) -> dict:
-        return self.wait_state(lambda _state: True)
