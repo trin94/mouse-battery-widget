@@ -2,14 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Harness for the system tests.
-
-UPowerMock serves org.freedesktop.UPower on a private dbus-daemon using
-dbus-fast, running an asyncio loop on a background thread. ProbeSession
-runs a headless quickshell against that bus, loading probe.qml as config.
-ViewModel wraps the object under test that the probe instantiates. Only
-the bus daemon and quickshell itself are separate processes.
-"""
+"""Harness for the system tests."""
 
 import asyncio
 import json

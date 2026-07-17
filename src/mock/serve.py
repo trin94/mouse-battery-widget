@@ -2,13 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Serve a controllable mock mouse and run the preview bar against it.
-
-Runs UPowerMock with one mouse device on a private bus and a quickshell
-instance rendering preview/ against it. The device is adjustable at
-runtime through a control interface on the session bus. Orchestrated by
-mod.just.
-"""
+"""Serve a controllable mock mouse and run the preview bar against it."""
 
 import asyncio
 import os

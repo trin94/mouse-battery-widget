@@ -2,15 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Generate the QML tooling files for the DMS qs.* imports.
-
-Quickshell resolves qs.* modules at runtime without qmldir files, so
-qmllint and qmlls cannot see them on their own. This script mirrors
-the installed DMS tree into a git-ignored import directory with
-generated qmldir files and refreshes .qmlls.ini to point there. Run
-by just init and reused by the qmllint hook. Fails when DMS is not
-installed.
-"""
+"""Generate the QML tooling files for the DMS qs.* imports."""
 
 import re
 import shutil
