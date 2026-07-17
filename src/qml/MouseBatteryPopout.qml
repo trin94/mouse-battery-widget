@@ -21,15 +21,11 @@ PopoutComponent {
         return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
     }
 
-    headerText: viewModel.isMouseDetected || viewModel.hasData ? viewModel.deviceName : I18n.tr("Mouse Battery")
-
     // qmlformat off
     detailsText: viewModel.isLive ? ""
-        : viewModel.isMouseDetected ? I18n.tr("No recent battery data. Waiting for the mouse to report.")
+        : viewModel.isMouseDetected ? I18n.tr("No recent battery data. Waiting for %1 to report.").arg(viewModel.deviceName)
         : I18n.tr("No supported mouse detected.")
     // qmlformat on
-
-    showCloseButton: true
 
     Column {
         id: batteryDetails
@@ -88,20 +84,6 @@ PopoutComponent {
             }
         }
 
-        StyledText {
-            text: I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.secondsUntilEmpty))
-            font.pixelSize: Theme.fontSizeSmall
-            color: Theme.surfaceVariantText
-            visible: root.viewModel.secondsUntilEmpty > 0
-        }
-
-        StyledText {
-            text: I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.secondsUntilFull))
-            font.pixelSize: Theme.fontSizeSmall
-            color: Theme.surfaceVariantText
-            visible: root.viewModel.secondsUntilFull > 0
-        }
-
         Rectangle {
             width: parent.width
             height: 8
@@ -121,6 +103,26 @@ PopoutComponent {
                     }
                 }
             }
+        }
+
+        StyledText {
+            text: I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.secondsUntilEmpty))
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.surfaceVariantText
+            visible: root.viewModel.secondsUntilEmpty > 0
+        }
+
+        StyledText {
+            text: I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.secondsUntilFull))
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.surfaceVariantText
+            visible: root.viewModel.secondsUntilFull > 0
+        }
+
+        StyledText {
+            text: root.viewModel.deviceName
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.surfaceVariantText
         }
     }
 }
