@@ -16,7 +16,7 @@ PluginSettings {
     pluginId: "mouseBatteryWidget"
 
     StyledText {
-        text: I18n.tr("Bar")
+        text: I18n.tr("Bar", "status bar section title")
         font.pixelSize: Theme.fontSizeMedium
         font.weight: Font.Medium
         color: Theme.surfaceText
@@ -25,13 +25,13 @@ PluginSettings {
     ToggleSetting {
         settingKey: "showPercentage"
         label: I18n.tr("Show battery percentage")
-        defaultValue: true
+        defaultValue: MouseBatteryDefaults.showPercentage
     }
 
     ToggleSetting {
         settingKey: "showBolt"
         label: I18n.tr("Show charging indicator")
-        defaultValue: true
+        defaultValue: MouseBatteryDefaults.showBolt
     }
 
     Rectangle {
@@ -50,12 +50,18 @@ PluginSettings {
 
     SliderSetting {
         settingKey: "lowBatteryPercent"
-        label: I18n.tr("Threshold")
+        label: I18n.tr("Threshold", "low battery threshold")
         description: I18n.tr("Battery percentage at or below which the battery counts as low")
-        defaultValue: 20
+        defaultValue: MouseBatteryDefaults.lowBatteryPercent
         minimum: 0
         maximum: 100
         unit: "%"
+    }
+
+    ToggleSetting {
+        settingKey: "notifyOnLowBattery"
+        label: I18n.tr("Send a notification")
+        defaultValue: MouseBatteryDefaults.notifyOnLowBattery
     }
 
     Rectangle {
@@ -66,7 +72,7 @@ PluginSettings {
     }
 
     StyledText {
-        text: I18n.tr("GitHub")
+        text: "GitHub"
         font.pixelSize: Theme.fontSizeSmall
         color: repoLinkArea.containsMouse ? Theme.primary : Theme.surfaceVariantText
         visible: !!root._homepage

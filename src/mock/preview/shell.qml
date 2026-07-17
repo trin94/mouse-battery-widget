@@ -30,4 +30,8 @@ ShellRoot {
             anchors.centerIn: parent
         }
     }
+
+    MouseBatteryDaemon {
+        pluginId: "mouseBatteryWidget"
+    }
 }

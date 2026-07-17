@@ -24,6 +24,7 @@ TestCase {
             showPercentage: true
             showBolt: true
             lowBatteryPercent: 20
+            notifyOnLowBattery: true
         }
     }
 
@@ -166,6 +167,13 @@ TestCase {
                 expected: "Fully charged"
             },
             {
+                tag: "pendingCharge",
+                props: {
+                    state: UPowerDeviceState.PendingCharge
+                },
+                expected: "Charging"
+            },
+            {
                 tag: "notReporting",
                 props: {
                     state: UPowerDeviceState.Unknown
@@ -257,6 +265,14 @@ TestCase {
                     state: UPowerDeviceState.FullyCharged
                 },
                 expected: MouseBatteryViewModel.Tone.Charging
+            },
+            {
+                tag: "pendingChargeAtLowLevel",
+                props: {
+                    state: UPowerDeviceState.PendingCharge,
+                    percentage: 0.15
+                },
+                expected: MouseBatteryViewModel.Tone.Charging
             }
         ];
     }
@@ -285,6 +301,13 @@ TestCase {
                 tag: "fullyCharged",
                 props: {
                     state: UPowerDeviceState.FullyCharged
+                },
+                expected: true
+            },
+            {
+                tag: "pendingCharge",
+                props: {
+                    state: UPowerDeviceState.PendingCharge
                 },
                 expected: true
             }

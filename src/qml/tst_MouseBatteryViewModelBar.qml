@@ -24,6 +24,7 @@ TestCase {
             showPercentage: true
             showBolt: true
             lowBatteryPercent: 20
+            notifyOnLowBattery: true
         }
     }
 
@@ -98,6 +99,36 @@ TestCase {
         fuzzyCompare(control.thresholdLevel, data.expectedThresholdLevel, 1e-9);
         fuzzyCompare(control.lowSegmentFill, data.expectedLowFill, 1e-9);
         fuzzyCompare(control.highSegmentFill, data.expectedHighFill, 1e-9);
+    }
+
+    function test_runtimeThresholdChangeMovesSplit() {
+        bridge.addMouse({
+            percentage: 0.5
+        });
+        const control = makeControl();
+        fuzzyCompare(control.thresholdLevel, 0.2, 1e-9);
+        fuzzyCompare(control.lowSegmentFill, 1, 1e-9);
+        fuzzyCompare(control.highSegmentFill, 0.375, 1e-9);
+
+        control.lowBatteryPercent = 50;
+
+        fuzzyCompare(control.thresholdLevel, 0.5, 1e-9);
+        fuzzyCompare(control.lowSegmentFill, 1, 1e-9);
+        fuzzyCompare(control.highSegmentFill, 0, 1e-9);
+    }
+
+    function test_disabledNotificationHidesSplit() {
+        bridge.addMouse({
+            percentage: 0.5
+        });
+
+        const control = makeControl({
+            notifyOnLowBattery: false
+        });
+
+        fuzzyCompare(control.thresholdLevel, 0, 1e-9);
+        fuzzyCompare(control.lowSegmentFill, 0, 1e-9);
+        fuzzyCompare(control.highSegmentFill, 0.5, 1e-9);
     }
 
     function test_showsLevelBar_data() {

@@ -15,6 +15,8 @@ SPDX-License-Identifier: MIT
 - Don't use structural comments like `# region` or `# ---`.
 - Avoid comments unless absolutely necessary.
 - Use the `signal name(value: type)` notation instead of the old `signal name(type value)` notation in QML signals.
+- List every new QML component in `src/qml/qmldir`. The qmldir enables the `MouseBatteryDefaults`
+  singleton and shadows the implicit directory type resolution.
 - Follow official QML coding conventions.
 - Respect the recommended QML file layout:
   01. id
