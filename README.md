@@ -6,6 +6,10 @@ SPDX-License-Identifier: MIT
 
 # 🖱️ Mouse Battery Widget
 
+[![Pipeline](https://github.com/trin94/mouse-battery-widget/actions/workflows/verify.yml/badge.svg)](https://github.com/trin94/mouse-battery-widget/actions/workflows/verify.yml)
+[![REUSE status](https://api.reuse.software/badge/github.com/trin94/mouse-battery-widget)](https://api.reuse.software/info/github.com/trin94/mouse-battery-widget)
+[![License: MIT](https://img.shields.io/github/license/trin94/mouse-battery-widget)](LICENSES/MIT.txt)
+
 A [Dank Material Shell](https://github.com/AvengeMedia/DankMaterialShell) plugin that shows your wireless mouse battery level in the bar.
 
 - 🔋 Battery percentage in a bar pill.
