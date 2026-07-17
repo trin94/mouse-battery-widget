@@ -31,11 +31,15 @@ class MouseBatteryTestBridge(QObject):
         self._devices = device_model()
 
     @Slot("QVariantMap", result=UPowerDevice)
-    def addMouse(self, overrides: dict[str, object]) -> UPowerDevice:
+    def addDevice(self, properties: dict[str, object]) -> UPowerDevice:
         device = UPowerDevice(self._devices)
-        _apply(device, _MOUSE_DEFAULTS | overrides)
+        _apply(device, properties)
         self._devices.add(device)
         return device
+
+    @Slot("QVariantMap", result=UPowerDevice)
+    def addMouse(self, overrides: dict[str, object]) -> UPowerDevice:
+        return self.addDevice(_MOUSE_DEFAULTS | overrides)
 
     @Slot(UPowerDevice, "QVariantMap")
     def update(self, device: UPowerDevice, overrides: dict[str, object]) -> None:
