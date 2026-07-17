@@ -6,6 +6,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
+import Quickshell
+
+import qs.Common
 import qs.Modules.Plugins
 
 PluginComponent {
@@ -38,6 +41,16 @@ PluginComponent {
             iconSize: root.iconSize
             barThickness: root.barThickness
             barConfig: root.barConfig
+        }
+    }
+
+    Connections {
+        target: root.viewModel
+
+        function onLowBatteryReached(percent: int, deviceName: string) {
+            const summary = I18n.tr("Mouse battery low");
+            const body = I18n.tr("%1 is at %2%. Recharge it soon.").arg(deviceName).arg(percent);
+            Quickshell.execDetached(["notify-send", "-u", "normal", "-a", "Mouse Battery Widget", "-i", "battery-caution", summary, body]);
         }
     }
 }

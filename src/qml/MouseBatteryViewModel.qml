@@ -83,6 +83,9 @@ QtObject {
         return MouseBatteryViewModel.Tone.Normal;
     }
 
+    // Fired once when a live reading drops to or below the low threshold.
+    signal lowBatteryReached(percent: int, deviceName: string)
+
     component NullDevice: QtObject {
         readonly property real percentage: 0
         readonly property string model: ""
@@ -144,6 +147,8 @@ QtObject {
 
         readonly property bool isMouseLive: mouse !== null && isReporting(mouse)
 
+        readonly property bool hasLowLiveReading: isMouseLive && live.isLow
+
         readonly property NullDevice nullDevice: NullDevice {}
 
         readonly property DisplayState noData: DisplayState {
@@ -170,6 +175,11 @@ QtObject {
                 name: ""
             })
 
+        property bool hasAnnouncedLowBattery: false
+
+        // Suppresses the signal for the state found at startup.
+        property bool isReady: false
+
         function captureReading(): void {
             if (!isMouseLive)
                 return;
@@ -189,6 +199,26 @@ QtObject {
             const minutes = Math.floor((seconds % 3600) / 60);
             return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
         }
+
+        // Announces once per drop into the low state. A live reading above
+        // the threshold re-arms, losing the mouse keeps the latch so a
+        // sleeping low mouse does not announce again on every wake.
+        function announceLowBattery(): void {
+            if (!isMouseLive)
+                return;
+            if (!live.isLow) {
+                hasAnnouncedLowBattery = false;
+                return;
+            }
+            if (hasAnnouncedLowBattery)
+                return;
+            hasAnnouncedLowBattery = true;
+            if (isReady)
+                root.lowBatteryReached(live.percent, live.deviceName);
+        }
+
+        onIsMouseLiveChanged: announceLowBattery()
+        onHasLowLiveReadingChanged: announceLowBattery()
     }
 
     readonly property Private _private: Private {}
@@ -210,5 +240,9 @@ QtObject {
     onLevelChanged: _private.captureReading()
     onDeviceNameChanged: _private.captureReading()
 
-    Component.onCompleted: _private.captureReading()
+    Component.onCompleted: {
+        _private.captureReading();
+        _private.announceLowBattery();
+        _private.isReady = true;
+    }
 }
