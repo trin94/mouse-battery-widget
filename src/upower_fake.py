@@ -47,13 +47,13 @@ class UPowerDeviceType(QObject):
 
 @QmlElement
 class UPowerDevice(QObject):
-    typeChanged = Signal()
-    stateChanged = Signal()
-    percentageChanged = Signal()
-    modelChanged = Signal()
-    timeToEmptyChanged = Signal()
-    timeToFullChanged = Signal()
-    readyChanged = Signal()
+    typeChanged = Signal(int)
+    stateChanged = Signal(int)
+    percentageChanged = Signal(float)
+    modelChanged = Signal(str)
+    timeToEmptyChanged = Signal(float)
+    timeToFullChanged = Signal(float)
+    readyChanged = Signal(bool)
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
@@ -65,69 +65,75 @@ class UPowerDevice(QObject):
         self._time_to_full = 0.0
         self._ready = True
 
-    def _get_type(self) -> int:
+    @Property(int, notify=typeChanged)
+    def type(self) -> int:
         return self._type
 
-    def _set_type(self, value: int) -> None:
+    @type.setter
+    def type(self, value: int) -> None:
         if self._type != value:
             self._type = value
-            self.typeChanged.emit()
+            self.typeChanged.emit(value)
 
-    def _get_state(self) -> int:
+    @Property(int, notify=stateChanged)
+    def state(self) -> int:
         return self._state
 
-    def _set_state(self, value: int) -> None:
+    @state.setter
+    def state(self, value: int) -> None:
         if self._state != value:
             self._state = value
-            self.stateChanged.emit()
+            self.stateChanged.emit(value)
 
-    def _get_percentage(self) -> float:
+    @Property(float, notify=percentageChanged)
+    def percentage(self) -> float:
         return self._percentage
 
-    def _set_percentage(self, value: float) -> None:
+    @percentage.setter
+    def percentage(self, value: float) -> None:
         if self._percentage != value:
             self._percentage = value
-            self.percentageChanged.emit()
+            self.percentageChanged.emit(value)
 
-    def _get_model(self) -> str:
+    @Property(str, notify=modelChanged)
+    def model(self) -> str:
         return self._model
 
-    def _set_model(self, value: str) -> None:
+    @model.setter
+    def model(self, value: str) -> None:
         if self._model != value:
             self._model = value
-            self.modelChanged.emit()
+            self.modelChanged.emit(value)
 
-    def _get_time_to_empty(self) -> float:
+    @Property(float, notify=timeToEmptyChanged)
+    def timeToEmpty(self) -> float:
         return self._time_to_empty
 
-    def _set_time_to_empty(self, value: float) -> None:
+    @timeToEmpty.setter
+    def timeToEmpty(self, value: float) -> None:
         if self._time_to_empty != value:
             self._time_to_empty = value
-            self.timeToEmptyChanged.emit()
+            self.timeToEmptyChanged.emit(value)
 
-    def _get_time_to_full(self) -> float:
+    @Property(float, notify=timeToFullChanged)
+    def timeToFull(self) -> float:
         return self._time_to_full
 
-    def _set_time_to_full(self, value: float) -> None:
+    @timeToFull.setter
+    def timeToFull(self, value: float) -> None:
         if self._time_to_full != value:
             self._time_to_full = value
-            self.timeToFullChanged.emit()
+            self.timeToFullChanged.emit(value)
 
-    def _get_ready(self) -> bool:
+    @Property(bool, notify=readyChanged)
+    def ready(self) -> bool:
         return self._ready
 
-    def _set_ready(self, value: bool) -> None:
+    @ready.setter
+    def ready(self, value: bool) -> None:
         if self._ready != value:
             self._ready = value
-            self.readyChanged.emit()
-
-    type = Property(int, _get_type, _set_type, notify=typeChanged)
-    state = Property(int, _get_state, _set_state, notify=stateChanged)
-    percentage = Property(float, _get_percentage, _set_percentage, notify=percentageChanged)
-    model = Property(str, _get_model, _set_model, notify=modelChanged)
-    timeToEmpty = Property(float, _get_time_to_empty, _set_time_to_empty, notify=timeToEmptyChanged)
-    timeToFull = Property(float, _get_time_to_full, _set_time_to_full, notify=timeToFullChanged)
-    ready = Property(bool, _get_ready, _set_ready, notify=readyChanged)
+            self.readyChanged.emit(value)
 
 
 class FakeDeviceModel(QObject):
@@ -139,10 +145,9 @@ class FakeDeviceModel(QObject):
         super().__init__(parent)
         self._values: list[UPowerDevice] = []
 
-    def _get_values(self) -> list[UPowerDevice]:
+    @Property(list, notify=valuesChanged)
+    def values(self) -> list[UPowerDevice]:
         return list(self._values)
-
-    values = Property(list, _get_values, notify=valuesChanged)
 
     def add(self, device: UPowerDevice) -> None:
         self._values = [*self._values, device]
@@ -176,7 +181,6 @@ class UPower(QObject):
         super().__init__(parent)
         self._devices = _DEVICE_MODEL
 
-    def _get_devices(self) -> FakeDeviceModel:
+    @Property(QObject, constant=True)
+    def devices(self) -> FakeDeviceModel:
         return self._devices
-
-    devices = Property(QObject, _get_devices, constant=True)

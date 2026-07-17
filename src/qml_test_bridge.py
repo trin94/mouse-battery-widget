@@ -30,18 +30,18 @@ class MouseBatteryTestBridge(QObject):
         super().__init__(parent)
         self._devices = device_model()
 
-    @Slot("QVariantMap", result=UPowerDevice)
+    @Slot(dict, result=UPowerDevice)
     def addDevice(self, properties: dict[str, object]) -> UPowerDevice:
         device = UPowerDevice(self._devices)
         _apply(device, properties)
         self._devices.add(device)
         return device
 
-    @Slot("QVariantMap", result=UPowerDevice)
+    @Slot(dict, result=UPowerDevice)
     def addMouse(self, overrides: dict[str, object]) -> UPowerDevice:
         return self.addDevice(_MOUSE_DEFAULTS | overrides)
 
-    @Slot(UPowerDevice, "QVariantMap")
+    @Slot(UPowerDevice, dict)
     def update(self, device: UPowerDevice, overrides: dict[str, object]) -> None:
         if not self._devices.contains(device):
             message = "cannot update a device that is not registered"
