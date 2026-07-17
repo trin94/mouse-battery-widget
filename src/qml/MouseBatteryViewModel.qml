@@ -19,6 +19,9 @@ QtObject {
     // User setting: show the charging bolt in the bar.
     required property bool showBolt
 
+    // User setting: percentage at or below which the battery counts as low.
+    required property int lowBatteryPercent
+
     // Percentage text for the bar, empty while hidden by setting or missing data.
     readonly property string barLabel: showPercentage ? percentText : ""
 
@@ -104,8 +107,6 @@ QtObject {
     component LiveState: DisplayState {
         required property var device
 
-        readonly property int lowBatteryPercent: 20
-
         isLive: true
         level: device.percentage
         percent: Math.round(level * 100)
@@ -121,7 +122,7 @@ QtObject {
 
         secondsUntilEmpty: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : 0
         secondsUntilFull: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? 0 : device.timeToFull
-        isLow: chargeState === MouseBatteryViewModel.ChargeState.Discharging && percent <= lowBatteryPercent
+        isLow: chargeState === MouseBatteryViewModel.ChargeState.Discharging && percent <= root.lowBatteryPercent
     }
 
     component StaleState: DisplayState {
