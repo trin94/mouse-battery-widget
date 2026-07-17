@@ -27,12 +27,6 @@ TestCase {
         }
     }
 
-    Component {
-        id: signalSpy
-
-        SignalSpy {}
-    }
-
     MouseBatteryTestBridge {
         id: bridge
     }
@@ -45,15 +39,6 @@ TestCase {
         const control = createTemporaryObject(objectUnderTest, testCase, initProperties);
         verify(control);
         return control;
-    }
-
-    function makeSpy(target, signalName) {
-        const spy = createTemporaryObject(signalSpy, testCase, {
-            target: target,
-            signalName: signalName
-        });
-        verify(spy);
-        return spy;
     }
 
     function test_noReadingsYetShowsEmptyState() {
