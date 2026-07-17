@@ -31,4 +31,14 @@ PluginSettings {
         label: I18n.tr("Show charging indicator")
         defaultValue: true
     }
+
+    SliderSetting {
+        settingKey: "lowBatteryPercent"
+        label: I18n.tr("Low battery threshold")
+        description: I18n.tr("Battery percentage at or below which the battery counts as low")
+        defaultValue: 20
+        minimum: 0
+        maximum: 100
+        unit: "%"
+    }
 }

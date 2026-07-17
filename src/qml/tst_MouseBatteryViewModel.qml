@@ -23,6 +23,7 @@ TestCase {
         MouseBatteryViewModel {
             showPercentage: true
             showBolt: true
+            lowBatteryPercent: 20
         }
     }
 
@@ -309,6 +310,53 @@ TestCase {
         bridge.addMouse(data.props);
 
         compare(makeControl().showsBolt, data.expected);
+    }
+
+    function test_lowBatteryThresholdIsConfigurable_data() {
+        return [
+            {
+                tag: "atRaisedThreshold",
+                props: {
+                    percentage: 0.4
+                },
+                threshold: 40,
+                expected: MouseBatteryViewModel.Tone.Low
+            },
+            {
+                tag: "aboveRaisedThreshold",
+                props: {
+                    percentage: 0.41
+                },
+                threshold: 40,
+                expected: MouseBatteryViewModel.Tone.Normal
+            },
+            {
+                tag: "atLoweredThreshold",
+                props: {
+                    percentage: 0.05
+                },
+                threshold: 5,
+                expected: MouseBatteryViewModel.Tone.Low
+            },
+            {
+                tag: "aboveLoweredThreshold",
+                props: {
+                    percentage: 0.06
+                },
+                threshold: 5,
+                expected: MouseBatteryViewModel.Tone.Normal
+            }
+        ];
+    }
+
+    function test_lowBatteryThresholdIsConfigurable(data) {
+        bridge.addMouse(data.props);
+
+        const control = makeControl({
+            lowBatteryPercent: data.threshold
+        });
+
+        compare(control.tone, data.expected);
     }
 
     function test_propertyUpdatesPropagate() {

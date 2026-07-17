@@ -14,6 +14,7 @@ PluginComponent {
     readonly property MouseBatteryViewModel viewModel: MouseBatteryViewModel {
         showPercentage: root.pluginData?.showPercentage ?? true
         showBolt: root.pluginData?.showBolt ?? true
+        lowBatteryPercent: root.pluginData?.lowBatteryPercent ?? 20
     }
 
     popoutContent: Component {
