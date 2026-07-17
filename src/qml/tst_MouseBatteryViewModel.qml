@@ -40,7 +40,7 @@ TestCase {
         bridge.reset();
     }
 
-    function makeControl(initProperties = {}) {
+    function makeControl(initProperties = {}): MouseBatteryViewModel {
         const control = createTemporaryObject(objectUnderTest, testCase, initProperties);
         verify(control);
         return control;

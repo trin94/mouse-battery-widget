@@ -105,6 +105,10 @@ extend-select = [
     "S607",
 ]
 
+"**/upower_fake.py" = [
+    "A003",              # Property names must mirror the Quickshell API, including `type`
+]
+
 "**/lint_qml.py" = [
     "S404",           # Spawning qmllint is the script's job
     "S603",
