@@ -10,13 +10,15 @@ import qs.Widgets
 
 PluginSettings {
     id: root
+
+    readonly property string _homepage: pluginService?.availablePlugins?.[pluginId]?.homepage ?? ""
+
     pluginId: "mouseBatteryWidget"
 
     StyledText {
-        width: parent.width
-        text: I18n.tr("Mouse Battery Widget")
-        font.pixelSize: Theme.fontSizeLarge
-        font.weight: Font.Bold
+        text: I18n.tr("Bar")
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: Font.Medium
         color: Theme.surfaceText
     }
 
@@ -32,13 +34,50 @@ PluginSettings {
         defaultValue: true
     }
 
+    Rectangle {
+        width: parent.width
+        height: 1
+        color: Theme.outline
+        opacity: 0.3
+    }
+
+    StyledText {
+        text: I18n.tr("Low battery")
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: Font.Medium
+        color: Theme.surfaceText
+    }
+
     SliderSetting {
         settingKey: "lowBatteryPercent"
-        label: I18n.tr("Low battery threshold")
+        label: I18n.tr("Threshold")
         description: I18n.tr("Battery percentage at or below which the battery counts as low")
         defaultValue: 20
         minimum: 0
         maximum: 100
         unit: "%"
+    }
+
+    Rectangle {
+        width: parent.width
+        height: 1
+        color: Theme.outline
+        opacity: 0.3
+    }
+
+    StyledText {
+        text: I18n.tr("GitHub")
+        font.pixelSize: Theme.fontSizeSmall
+        color: repoLinkArea.containsMouse ? Theme.primary : Theme.surfaceVariantText
+        visible: !!root._homepage
+
+        MouseArea {
+            id: repoLinkArea
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Qt.openUrlExternally(root._homepage)
+        }
     }
 }
