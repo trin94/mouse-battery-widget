@@ -75,23 +75,39 @@ PopoutComponent {
             }
         }
 
-        Rectangle {
+        Item {
             width: parent.width
             height: 8
-            radius: height / 2
-            color: Theme.surfaceVariantAlpha
+            visible: root.viewModel.showsLevelBar
 
             Rectangle {
-                width: parent.width * root.viewModel.level
-                height: parent.height
-                radius: parent.radius
-                color: batteryDetails.barColor
+                id: lowSegment
 
-                Behavior on width {
-                    NumberAnimation {
-                        duration: Theme.shortDuration
-                        easing.type: Theme.standardEasing
-                    }
+                width: Math.max(0, (parent.width - Theme.spacingXS) * root.viewModel.thresholdLevel)
+                height: parent.height
+                radius: height / 2
+                color: Theme.withAlpha(Theme.error, 0.2)
+
+                Rectangle {
+                    width: parent.width * root.viewModel.lowSegmentFill
+                    height: parent.height
+                    radius: parent.radius
+                    color: batteryDetails.barColor
+                }
+            }
+
+            Rectangle {
+                x: lowSegment.width > 0 ? lowSegment.width + Theme.spacingXS : 0
+                width: Math.max(0, parent.width - x)
+                height: parent.height
+                radius: height / 2
+                color: Theme.surfaceVariantAlpha
+
+                Rectangle {
+                    width: parent.width * root.viewModel.highSegmentFill
+                    height: parent.height
+                    radius: parent.radius
+                    color: batteryDetails.barColor
                 }
             }
         }
