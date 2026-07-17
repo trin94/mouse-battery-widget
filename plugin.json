@@ -5,6 +5,7 @@
     "description": "Shows wireless mouse battery level in the bar",
     "version": "1.0.0",
     "author": "Elias Mueller",
+    "homepage": "https://github.com/trin94/mouse-battery-widget",
     "icon": "mouse",
     "type": "widget",
     "capabilities": ["dankbar-widget", "battery", "peripheral"],
