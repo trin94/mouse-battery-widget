@@ -58,15 +58,16 @@ TestCase {
     function test_noReadingsYetShowsEmptyState() {
         const control = makeControl();
 
-        verify(!control.isLive);
         verify(!control.hasData);
-        verify(!control.isStale);
-        verify(!control.isMouseDetected);
-        compare(control.label, "");
-        verify(!control.shouldShowLabel);
+        verify(control.isDimmed);
+        compare(control.barLabel, "");
+        compare(control.percentText, "");
+        compare(control.statusText, "");
+        compare(control.estimateText, "");
+        compare(control.emptyStateText, "No supported mouse detected.");
         compare(control.deviceName, "Mouse");
-        compare(control.percent, -1);
         compare(control.level, 0);
+        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
     }
 
     function test_nonMouseDevicesAreIgnored() {
@@ -79,8 +80,9 @@ TestCase {
 
         const control = makeControl();
 
-        verify(!control.isLive);
-        verify(!control.isMouseDetected);
+        verify(!control.hasData);
+        verify(control.isDimmed);
+        compare(control.emptyStateText, "No supported mouse detected.");
         compare(control.deviceName, "Mouse");
     }
 
@@ -91,8 +93,9 @@ TestCase {
 
         const control = makeControl();
 
-        verify(!control.isLive);
-        verify(control.isMouseDetected);
+        verify(!control.hasData);
+        verify(control.isDimmed);
+        compare(control.emptyStateText, "No recent battery data. Waiting for Test Mouse to report.");
     }
 
     function test_mouseWithUnknownStateShowsItsModelName() {
@@ -103,20 +106,19 @@ TestCase {
         const control = makeControl();
 
         compare(control.deviceName, "Test Mouse");
-        verify(!control.isLive);
         verify(!control.hasData);
     }
 
     function test_mouseAddedAtRuntimeIsPickedUp() {
         const control = makeControl();
-        verify(!control.isLive);
+        verify(control.isDimmed);
 
         bridge.addMouse({
             percentage: 0.42
         });
 
-        verify(control.isLive);
-        compare(control.percent, 42);
+        verify(!control.isDimmed);
+        compare(control.percentText, "42%");
     }
 
     function test_qualifyingMouseIsPickedAmongOtherDevices() {
@@ -136,8 +138,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        compare(control.percent, 63);
+        verify(!control.isDimmed);
+        compare(control.percentText, "63%");
         compare(control.deviceName, "Test Mouse");
     }
 
@@ -146,18 +148,17 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        compare(control.percent, 100);
-        compare(control.label, "100%");
+        verify(control.hasData);
+        verify(!control.isDimmed);
+        compare(control.barLabel, "100%");
+        compare(control.percentText, "100%");
+        compare(control.statusText, "Discharging");
+        compare(control.estimateText, "");
+        compare(control.emptyStateText, "");
         compare(control.deviceName, "Test Mouse");
         compare(control.level, 1);
-        verify(!control.isPluggedIn);
-        verify(!control.isFullyCharged);
-        verify(!control.isLow);
-        verify(!control.shouldShowBolt);
-        verify(control.shouldShowLabel);
-        compare(control.secondsUntilEmpty, 0);
-        compare(control.secondsUntilFull, 0);
+        verify(!control.showsBolt);
+        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
     }
 
     function test_mouseWithoutModelGetsFallbackName() {
@@ -167,24 +168,24 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
+        verify(!control.isDimmed);
         compare(control.deviceName, "Mouse");
     }
 
     function test_propertyUpdatesPropagate() {
         const mouse = bridge.addMouse({});
         const control = makeControl();
-        verify(control.isLive);
+        verify(!control.isDimmed);
 
         bridge.update(mouse, {
             percentage: 0.12,
             state: UPowerDeviceState.Charging
         });
 
-        compare(control.percent, 12);
-        verify(control.shouldShowBolt);
-        verify(control.isPluggedIn);
-        verify(!control.isLow);
+        compare(control.percentText, "12%");
+        compare(control.statusText, "Charging");
+        verify(control.showsBolt);
+        compare(control.tone, MouseBatteryViewModel.Tone.Charging);
     }
 
     function test_lowDischargingMouseIsMarkedLow() {
@@ -194,8 +195,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        verify(control.isLow);
+        verify(!control.isDimmed);
+        compare(control.tone, MouseBatteryViewModel.Tone.Low);
     }
 
     function test_mouseAboveLowThresholdIsNotMarkedLow() {
@@ -205,8 +206,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        verify(!control.isLow);
+        verify(!control.isDimmed);
+        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
     }
 
     function test_dischargingMouseShowsTimeRemaining() {
@@ -216,9 +217,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        compare(control.secondsUntilEmpty, 4500);
-        compare(control.secondsUntilFull, 0);
+        verify(!control.isDimmed);
+        compare(control.estimateText, "Time remaining: 1h 15m");
     }
 
     function test_chargingMouseShowsBolt() {
@@ -229,10 +229,10 @@ TestCase {
 
         const control = makeControl();
 
-        compare(control.percent, 50);
-        verify(control.isPluggedIn);
-        verify(control.shouldShowBolt);
-        verify(!control.isFullyCharged);
+        compare(control.percentText, "50%");
+        compare(control.statusText, "Charging");
+        verify(control.showsBolt);
+        compare(control.tone, MouseBatteryViewModel.Tone.Charging);
     }
 
     function test_chargingMouseShowsTimeUntilFull() {
@@ -244,9 +244,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        compare(control.secondsUntilFull, 2700);
-        compare(control.secondsUntilEmpty, 0);
+        verify(!control.isDimmed);
+        compare(control.estimateText, "Time until full: 45m");
     }
 
     function test_chargingMouseWithoutEstimateHasNoDuration() {
@@ -257,9 +256,8 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.isLive);
-        compare(control.secondsUntilEmpty, 0);
-        compare(control.secondsUntilFull, 0);
+        verify(!control.isDimmed);
+        compare(control.estimateText, "");
     }
 
     function test_fullyChargedMouseShowsBolt() {
@@ -269,9 +267,9 @@ TestCase {
 
         const control = makeControl();
 
-        verify(control.shouldShowBolt);
-        verify(control.isFullyCharged);
-        verify(control.isPluggedIn);
+        verify(control.showsBolt);
+        compare(control.statusText, "Fully charged");
+        compare(control.tone, MouseBatteryViewModel.Tone.Charging);
     }
 
     function test_boltStaysHiddenWhenDisabled() {
@@ -283,8 +281,8 @@ TestCase {
             showBolt: false
         });
 
-        verify(control.isPluggedIn);
-        verify(!control.shouldShowBolt);
+        compare(control.statusText, "Charging");
+        verify(!control.showsBolt);
     }
 
     function test_labelStaysHiddenWhenPercentageDisabled() {
@@ -294,66 +292,68 @@ TestCase {
             showPercentage: false
         });
 
-        verify(control.isLive);
-        verify(!control.shouldShowLabel);
+        verify(!control.isDimmed);
+        compare(control.barLabel, "");
+        compare(control.percentText, "100%");
     }
 
     function test_mouseTurningUnknownKeepsLastReading() {
         const mouse = bridge.addMouse({});
         const control = makeControl();
-        verify(control.isLive);
+        verify(!control.isDimmed);
         bridge.update(mouse, {
             percentage: 0.42
         });
-        compare(control.percent, 42);
+        compare(control.percentText, "42%");
 
         bridge.update(mouse, {
             state: UPowerDeviceState.Unknown
         });
 
-        verify(!control.isLive);
-        verify(control.isStale);
-        verify(control.isMouseDetected);
-        compare(control.percent, 42);
-        compare(control.label, "42%");
+        verify(control.isDimmed);
+        verify(control.hasData);
+        compare(control.percentText, "42%");
+        compare(control.statusText, "");
         compare(control.deviceName, "Test Mouse");
+        compare(control.tone, MouseBatteryViewModel.Tone.Stale);
     }
 
     function test_removedMouseKeepsLastReading() {
         const mouse = bridge.addMouse({});
         const control = makeControl();
-        verify(control.isLive);
+        verify(!control.isDimmed);
         bridge.update(mouse, {
             percentage: 0.42
         });
-        compare(control.percent, 42);
+        compare(control.percentText, "42%");
 
         bridge.remove(mouse);
 
-        verify(!control.isLive);
-        verify(control.isStale);
+        verify(control.isDimmed);
         verify(control.hasData);
-        verify(!control.isMouseDetected);
-        compare(control.label, "42%");
+        compare(control.barLabel, "42%");
+        compare(control.percentText, "42%");
+        compare(control.emptyStateText, "No supported mouse detected.");
         compare(control.deviceName, "Test Mouse");
+        compare(control.tone, MouseBatteryViewModel.Tone.Stale);
     }
 
     function test_returningMouseReplacesStaleReading() {
         const mouse = bridge.addMouse({});
         const control = makeControl();
-        verify(control.isLive);
+        verify(!control.isDimmed);
 
         bridge.remove(mouse);
-        verify(control.isStale);
+        verify(control.isDimmed);
 
         bridge.addMouse({
             percentage: 0.63,
             model: "Returned Mouse"
         });
 
-        verify(control.isLive);
-        verify(!control.isStale);
-        compare(control.percent, 63);
+        verify(!control.isDimmed);
+        compare(control.percentText, "63%");
         compare(control.deviceName, "Returned Mouse");
+        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
     }
 }

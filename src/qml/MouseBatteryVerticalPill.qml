@@ -18,7 +18,7 @@ Column {
     required property var barConfig
 
     readonly property int textSize: Theme.barTextSize(barThickness, barConfig?.fontScale, barConfig?.maximizeWidgetText)
-    readonly property color contentColor: viewModel.isLive ? Theme.surfaceText : Theme.surfaceTextSecondary
+    readonly property color contentColor: viewModel.isDimmed ? Theme.surfaceTextSecondary : Theme.surfaceText
 
     spacing: 0
 
@@ -32,7 +32,7 @@ Column {
 
     Item {
         width: mouseIcon.width
-        height: root.viewModel.shouldShowBolt ? Theme.spacingXS + root.iconSize : 0
+        height: root.viewModel.showsBolt ? Theme.spacingXS + root.iconSize : 0
         anchors.horizontalCenter: parent.horizontalCenter
         clip: true
 
@@ -43,7 +43,7 @@ Column {
             anchors.top: parent.top
             anchors.topMargin: Theme.spacingXS
             anchors.horizontalCenter: parent.horizontalCenter
-            opacity: root.viewModel.shouldShowBolt ? 1 : 0
+            opacity: root.viewModel.showsBolt ? 1 : 0
 
             Behavior on opacity {
                 NumberAnimation {
@@ -63,13 +63,13 @@ Column {
 
     Item {
         width: labelText.implicitWidth
-        height: root.viewModel.shouldShowLabel ? Theme.spacingXS + labelText.implicitHeight : 0
+        height: root.viewModel.barLabel ? Theme.spacingXS + labelText.implicitHeight : 0
         anchors.horizontalCenter: parent.horizontalCenter
         clip: true
 
         StyledText {
             id: labelText
-            text: root.viewModel.label
+            text: root.viewModel.barLabel
             font.pixelSize: root.textSize
             color: root.contentColor
             anchors.top: parent.top
