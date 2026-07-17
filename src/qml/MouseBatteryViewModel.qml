@@ -34,8 +34,20 @@ QtObject {
     // There is something to show, either live or stale.
     readonly property bool hasData: _private.current.hasData
 
+    // The popout should render the level bar, false without a supported mouse.
+    readonly property bool showsLevelBar: _private.mouse !== null
+
     // Battery level from 0 to 1, frozen at the last reading while stale.
     readonly property real level: _private.current.level
+
+    // Low battery threshold from 0 to 1, splits the level bar into segments.
+    readonly property real thresholdLevel: lowBatteryPercent / 100
+
+    // Filled share of the bar segment below the threshold, from 0 to 1.
+    readonly property real lowSegmentFill: thresholdLevel > 0 ? Math.min(level, thresholdLevel) / thresholdLevel : 0
+
+    // Filled share of the bar segment above the threshold, from 0 to 1.
+    readonly property real highSegmentFill: thresholdLevel < 1 ? Math.max(0, level - thresholdLevel) / (1 - thresholdLevel) : 0
 
     // Battery percentage text, empty before the first reading.
     readonly property string percentText: hasData ? _private.current.percent + "%" : ""
