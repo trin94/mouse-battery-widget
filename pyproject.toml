@@ -14,6 +14,7 @@ dev = [
     "dbus-fast>=5.0.22",
     "prek>=0.4.9",
     "pyrefly>=1.1.1",
+    "pyside6-essentials>=6.11.1",
     "pytest>=9.1.1",
     "ruff>=0.15.21",
 ]
@@ -110,6 +111,11 @@ extend-select = [
     "S603",
 ]
 
+"**/qml_tooling.py" = [
+    "S404",              # Spawning the PySide6 QML tools is the script's job
+    "S603",
+]
+
 "**/mock/serve.py" = [
     "ANN",              # dbus-fast requires D-Bus signature strings as annotations
     "F821",             # D-Bus signature strings look like undefined names
@@ -126,7 +132,7 @@ extend-select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["harness", "qml_tooling", "upower_service"]
+known-first-party = ["harness", "qml_test_bridge", "qml_tooling", "upower_fake", "upower_service"]
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "SPDX-FileCopyrightText: Elias Mueller"

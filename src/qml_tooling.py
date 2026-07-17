@@ -6,11 +6,16 @@
 
 import re
 import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SHIM_ROOT = REPO_ROOT / ".qmllint-imports"
+
+BRIDGE_MODULE = "MouseBatteryWidget.Test"
+BRIDGE_SOURCE = REPO_ROOT / "src" / "qml_test_bridge.py"
 
 DMS_ROOTS = (
     Path.home() / ".config" / "quickshell" / "dms",
@@ -69,6 +74,39 @@ def generate_shims(dms_root: Path) -> None:
         (shim / "qmldir").write_text(qmldir_content(module, files), encoding="utf-8")
 
 
+def run_tool(name: str, *args: str) -> None:
+    tool = shutil.which(name)
+    if tool is None:
+        message = f"required tool not found: {name}"
+        raise FileNotFoundError(message)
+    result = subprocess.run([tool, *args], check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        message = f"{name} failed:\n{result.stdout}{result.stderr}"
+        raise RuntimeError(message)
+
+
+def generate_bridge_types() -> None:
+    """Generate qmldir and qmltypes for the QML types registered from Python."""
+    target = SHIM_ROOT.joinpath(*BRIDGE_MODULE.split("."))
+    shutil.rmtree(SHIM_ROOT / BRIDGE_MODULE.split(".", maxsplit=1)[0], ignore_errors=True)
+    target.mkdir(parents=True)
+
+    qmltypes = target / "qml_test_bridge.qmltypes"
+    with tempfile.TemporaryDirectory() as scratch:
+        metatypes = Path(scratch) / "metatypes.json"
+        run_tool("pyside6-metaobjectdump", str(BRIDGE_SOURCE), "-o", str(metatypes))
+        run_tool(
+            "pyside6-qmltyperegistrar",
+            f"--import-name={BRIDGE_MODULE}",
+            "--major-version=1",
+            f"--generate-qmltypes={qmltypes}",
+            "-o",
+            str(Path(scratch) / "registration.cpp"),
+            str(metatypes),
+        )
+    (target / "qmldir").write_text(f"module {BRIDGE_MODULE}\ntypeinfo {qmltypes.name}\n", encoding="utf-8")
+
+
 def import_paths() -> list[Path]:
     return [SHIM_ROOT, *(path for path in SYSTEM_QML_DIRS if path.is_dir())]
 
@@ -82,6 +120,7 @@ def write_qmlls_ini() -> None:
 
 def generate(dms_root: Path) -> None:
     generate_shims(dms_root)
+    generate_bridge_types()
     write_qmlls_ini()
 
 

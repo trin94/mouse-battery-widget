@@ -66,12 +66,16 @@ The most important recipes (run `just` for the full list):
 just init        # Set up the development environment
 just fmt         # Run all formatting and lint hooks
 just test        # Run the system tests
+just test-qml    # Run the QML unit tests
 just reload      # Reload the plugin after making changes
 just mock start  # Show the widget in a mock bar with a fake mouse
 ```
 
 `just test` launches the real quickshell binary headless against an in-process fake UPower daemon
 and asserts the derived state over IPC.
+
+`just test-qml` runs the `tst_*.qml` files through Qt Quick Test on a PySide6 engine, with a fake
+`Quickshell.Services.UPower` module registered from Python and driven by a test bridge.
 
 ## License
 
