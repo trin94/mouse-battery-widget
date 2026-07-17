@@ -15,17 +15,7 @@ PopoutComponent {
 
     required property MouseBatteryViewModel viewModel
 
-    function formatDuration(seconds: real): string {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
-    }
-
-    // qmlformat off
-    detailsText: viewModel.isLive ? ""
-        : viewModel.isMouseDetected ? I18n.tr("No recent battery data. Waiting for %1 to report.").arg(viewModel.deviceName)
-        : I18n.tr("No supported mouse detected.")
-    // qmlformat on
+    detailsText: viewModel.emptyStateText
 
     Column {
         id: batteryDetails
@@ -42,44 +32,45 @@ PopoutComponent {
         DankColorAnimation {
             id: stateColorAnimation
 
-            // qmlformat off
-            to: root.viewModel.isStale ? Theme.surfaceVariantText
-                : root.viewModel.isLow ? Theme.error
-                : root.viewModel.isPluggedIn ? Theme.primary
-                : Theme.surfaceText
-            // qmlformat on
+            to: {
+                if (root.viewModel.tone === MouseBatteryViewModel.Tone.Stale)
+                    return Theme.surfaceVariantText;
+                if (root.viewModel.tone === MouseBatteryViewModel.Tone.Low)
+                    return Theme.error;
+                if (root.viewModel.tone === MouseBatteryViewModel.Tone.Charging)
+                    return Theme.primary;
+                return Theme.surfaceText;
+            }
         }
 
         DankColorAnimation {
             id: barColorAnimation
 
-            // qmlformat off
-            to: root.viewModel.isStale ? Theme.withAlpha(Theme.primary, 0.4)
-                : root.viewModel.isLow ? Theme.error
-                : Theme.primary
-            // qmlformat on
+            to: {
+                if (root.viewModel.tone === MouseBatteryViewModel.Tone.Stale)
+                    return Theme.withAlpha(Theme.primary, 0.4);
+                if (root.viewModel.tone === MouseBatteryViewModel.Tone.Low)
+                    return Theme.error;
+                return Theme.primary;
+            }
         }
 
         Row {
             spacing: Theme.spacingS
 
             StyledText {
-                text: root.viewModel.label
+                text: root.viewModel.percentText
                 font.pixelSize: Theme.fontSizeXLarge
                 font.weight: Font.Bold
                 color: batteryDetails.stateColor
             }
 
             StyledText {
-                // qmlformat off
-                text: root.viewModel.isFullyCharged ? I18n.tr("Fully charged")
-                    : root.viewModel.isPluggedIn ? I18n.tr("Charging")
-                    : I18n.tr("Discharging")
-                // qmlformat on
+                text: root.viewModel.statusText
                 font.pixelSize: Theme.fontSizeLarge
                 font.weight: Font.Medium
                 color: Theme.surfaceVariantText
-                visible: root.viewModel.isLive
+                visible: !!root.viewModel.statusText
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -106,17 +97,10 @@ PopoutComponent {
         }
 
         StyledText {
-            text: I18n.tr("Time remaining: %1").arg(root.formatDuration(root.viewModel.secondsUntilEmpty))
+            text: root.viewModel.estimateText
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.surfaceVariantText
-            visible: root.viewModel.secondsUntilEmpty > 0
-        }
-
-        StyledText {
-            text: I18n.tr("Time until full: %1").arg(root.formatDuration(root.viewModel.secondsUntilFull))
-            font.pixelSize: Theme.fontSizeSmall
-            color: Theme.surfaceVariantText
-            visible: root.viewModel.secondsUntilFull > 0
+            visible: !!root.viewModel.estimateText
         }
 
         StyledText {

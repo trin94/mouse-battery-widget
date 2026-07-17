@@ -8,6 +8,8 @@ import QtQuick
 
 import Quickshell.Services.UPower
 
+import qs.Common
+
 QtObject {
     id: root
 
@@ -17,50 +19,66 @@ QtObject {
     // User setting: show the charging bolt in the bar.
     required property bool showBolt
 
-    // A valid battery reading is coming in right now.
-    readonly property bool isLive: _private.current.isLive
+    // Percentage text for the bar, empty while hidden by setting or missing data.
+    readonly property string barLabel: showPercentage ? percentText : ""
 
-    // The mouse stopped reporting and the shown values are its frozen last reading.
-    readonly property bool isStale: _private.current.isStale
+    // The bar should render the charging bolt.
+    readonly property bool showsBolt: showBolt && _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
+
+    // The bar content renders muted while no live reading is coming in.
+    readonly property bool isDimmed: !_private.current.isLive
 
     // There is something to show, either live or stale.
     readonly property bool hasData: _private.current.hasData
 
-    // UPower lists a mouse device at all, whatever its state.
-    readonly property bool isMouseDetected: _private.mouse !== null
-
     // Battery level from 0 to 1, frozen at the last reading while stale.
     readonly property real level: _private.current.level
 
-    // Battery level from 0 to 100, or -1 before the first reading.
-    readonly property int percent: _private.current.percent
+    // Battery percentage text, empty before the first reading.
+    readonly property string percentText: hasData ? _private.current.percent + "%" : ""
 
-    // Display text for the percentage, empty before the first reading.
-    readonly property string label: hasData ? percent + "%" : ""
+    // Charge state line, empty unless a battery reading is coming in right now.
+    readonly property string statusText: {
+        if (!_private.current.isLive)
+            return "";
+        if (_private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged)
+            return I18n.tr("Fully charged");
+        if (_private.current.chargeState === MouseBatteryViewModel.ChargeState.Charging)
+            return I18n.tr("Charging");
+        return I18n.tr("Discharging");
+    }
+
+    // Time estimate line, empty when UPower provides no estimate.
+    readonly property string estimateText: {
+        if (_private.current.secondsUntilEmpty > 0)
+            return I18n.tr("Time remaining: %1").arg(_private.formatDuration(_private.current.secondsUntilEmpty));
+        if (_private.current.secondsUntilFull > 0)
+            return I18n.tr("Time until full: %1").arg(_private.formatDuration(_private.current.secondsUntilFull));
+        return "";
+    }
+
+    // Explanation shown while live data is missing, empty otherwise.
+    readonly property string emptyStateText: {
+        if (_private.current.isLive)
+            return "";
+        if (_private.mouse !== null)
+            return I18n.tr("No recent battery data. Waiting for %1 to report.").arg(deviceName);
+        return I18n.tr("No supported mouse detected.");
+    }
 
     // Product name of the mouse, "Mouse" if unknown.
     readonly property string deviceName: _private.current.deviceName
 
-    // The mouse is charging or sits fully charged on the cable.
-    readonly property bool isPluggedIn: _private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging
-
-    // The mouse is plugged in and the battery is full.
-    readonly property bool isFullyCharged: _private.current.chargeState === MouseBatteryViewModel.ChargeState.FullyCharged
-
-    // A live, discharging battery is at or below the low threshold.
-    readonly property bool isLow: _private.current.isLow
-
-    // Estimated seconds until empty, 0 unless live, discharging, and UPower provides an estimate.
-    readonly property real secondsUntilEmpty: _private.current.secondsUntilEmpty
-
-    // Estimated seconds until full, 0 unless live, charging, and UPower provides an estimate.
-    readonly property real secondsUntilFull: _private.current.secondsUntilFull
-
-    // The bar should render the percentage label.
-    readonly property bool shouldShowLabel: showPercentage && hasData
-
-    // The bar should render the charging bolt.
-    readonly property bool shouldShowBolt: showBolt && isPluggedIn
+    // Color role for the shown data.
+    readonly property int tone: {
+        if (_private.current.isStale)
+            return MouseBatteryViewModel.Tone.Stale;
+        if (_private.current.isLow)
+            return MouseBatteryViewModel.Tone.Low;
+        if (_private.current.chargeState !== MouseBatteryViewModel.ChargeState.Discharging)
+            return MouseBatteryViewModel.Tone.Charging;
+        return MouseBatteryViewModel.Tone.Normal;
+    }
 
     component NullDevice: QtObject {
         readonly property real percentage: 0
@@ -93,11 +111,13 @@ QtObject {
         percent: Math.round(level * 100)
         deviceName: device.model || "Mouse"
 
-        // qmlformat off
-        chargeState: device.state === UPowerDeviceState.FullyCharged ? MouseBatteryViewModel.ChargeState.FullyCharged
-            : device.state === UPowerDeviceState.Charging ? MouseBatteryViewModel.ChargeState.Charging
-            : MouseBatteryViewModel.ChargeState.Discharging
-        // qmlformat on
+        chargeState: {
+            if (device.state === UPowerDeviceState.FullyCharged)
+                return MouseBatteryViewModel.ChargeState.FullyCharged;
+            if (device.state === UPowerDeviceState.Charging)
+                return MouseBatteryViewModel.ChargeState.Charging;
+            return MouseBatteryViewModel.ChargeState.Discharging;
+        }
 
         secondsUntilEmpty: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : 0
         secondsUntilFull: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? 0 : device.timeToFull
@@ -113,7 +133,6 @@ QtObject {
         deviceName: reading.name || "Mouse"
     }
 
-    // qmlformat off
     component Private: QtObject {
         id: priv
 
@@ -126,25 +145,50 @@ QtObject {
 
         readonly property NullDevice nullDevice: NullDevice {}
 
-        readonly property DisplayState noData: DisplayState { deviceName: priv.mouse?.model || "Mouse" }
-        readonly property LiveState live: LiveState { device: priv.isMouseLive ? priv.mouse : priv.nullDevice }
-        readonly property StaleState stale: StaleState { reading: priv.lastReading }
+        readonly property DisplayState noData: DisplayState {
+            deviceName: priv.mouse?.model || "Mouse"
+        }
 
-        readonly property DisplayState current: isMouseLive ? live : lastReading.valid ? stale : noData
+        readonly property LiveState live: LiveState {
+            device: priv.isMouseLive ? priv.mouse : priv.nullDevice
+        }
 
-        property var lastReading: ({ valid: false, level: 0, name: "" })
+        readonly property StaleState stale: StaleState {
+            reading: priv.lastReading
+        }
+
+        readonly property DisplayState current: {
+            if (isMouseLive)
+                return live;
+            return lastReading.valid ? stale : noData;
+        }
+
+        property var lastReading: ({
+                valid: false,
+                level: 0,
+                name: ""
+            })
 
         function captureReading(): void {
-            if (!root.isLive)
+            if (!isMouseLive)
                 return;
-            lastReading = { valid: true, level: root.level, name: root.deviceName };
+            lastReading = {
+                valid: true,
+                level: root.level,
+                name: root.deviceName
+            };
         }
 
         function isReporting(device: UPowerDevice): bool {
             return device.ready && device.state !== UPowerDeviceState.Unknown;
         }
+
+        function formatDuration(seconds: real): string {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
+        }
     }
-    // qmlformat on
 
     readonly property Private _private: Private {}
 
@@ -154,7 +198,14 @@ QtObject {
         FullyCharged
     }
 
-    onIsLiveChanged: _private.captureReading()
+    enum Tone {
+        Normal,
+        Charging,
+        Low,
+        Stale
+    }
+
+    onIsDimmedChanged: _private.captureReading()
     onLevelChanged: _private.captureReading()
     onDeviceNameChanged: _private.captureReading()
 

@@ -126,7 +126,14 @@ extend-select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["qml_test_bridge", "qml_tooling", "upower_fake", "upower_mock", "upower_service"]
+known-first-party = [
+    "qml_test_bridge",
+    "qml_tooling",
+    "qs_common_fake",
+    "upower_fake",
+    "upower_mock",
+    "upower_service",
+]
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "SPDX-FileCopyrightText: Elias Mueller"
