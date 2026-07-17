@@ -2,12 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Run qmllint on QML files with the DMS qs.* imports resolved.
-
-Regenerates the import shims and .qmlls.ini via qml_tooling, then
-runs qmllint against them. Invoked by prek with the QML files to
-check. Fails when DMS or qmllint is missing.
-"""
+"""Run qmllint on QML files with the DMS qs.* imports resolved."""
 
 import shutil
 import subprocess

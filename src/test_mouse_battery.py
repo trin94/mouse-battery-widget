@@ -2,19 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""System tests running the real quickshell binary against a mocked upowerd.
-
-Each test starts a private D-Bus bus serving an in-process fake upowerd and
-a headless quickshell instance loading probe.qml straight from src/, which
-keeps the view model inside quickshell's config-folder import boundary. The
-probe is a generic stub: tests create the object under test through its IPC
-interface and read back the derived state, so they observe what the view
-model computes from Quickshell's real UPower client code.
-
-The tests are ordered ascending along the widget's lifecycle: from an empty
-bus over a detected but silent mouse to live readings, and finally to the
-stale state after the mouse is gone.
-"""
+"""System tests running the real quickshell binary against a mocked upowerd."""
 
 import itertools
 import sys
