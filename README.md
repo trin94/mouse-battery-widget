@@ -16,8 +16,8 @@ A [Dank Material Shell](https://github.com/AvengeMedia/DankMaterialShell) plugin
 - ⚡ Bolt icon while charging.
 - 💤 Keeps the last reading visible but dimmed while the mouse sleeps or is disconnected.
 - 🪟 Click for a popout with the mouse name, charge state, level bar, and time estimate.
-- 🔔 Desktop notification when the level drops below a configurable threshold.
-- 🔌 Reads `Quickshell.Services.UPower` directly. No polling or shelling out.
+- 🔔 Desktop notification when the level drops to or below a configurable threshold.
+- 🔌 Reads `Quickshell.Services.UPower` directly. No polling.
 
 ## Requirements
 

@@ -22,6 +22,9 @@ QtObject {
     // User setting: percentage at or below which the battery counts as low.
     required property int lowBatteryPercent
 
+    // User setting: announce the drop into the low state.
+    required property bool notifyOnLowBattery
+
     // Percentage text for the bar, empty while hidden by setting or missing data.
     readonly property string barLabel: showPercentage ? percentText : ""
 
@@ -40,8 +43,9 @@ QtObject {
     // Battery level from 0 to 1, frozen at the last reading while stale.
     readonly property real level: _private.current.level
 
-    // Low battery threshold from 0 to 1, splits the level bar into segments.
-    readonly property real thresholdLevel: lowBatteryPercent / 100
+    // Low battery threshold from 0 to 1, splits the level bar into
+    // segments. Zero while notifications are off, rendering a plain bar.
+    readonly property real thresholdLevel: notifyOnLowBattery ? lowBatteryPercent / 100 : 0
 
     // Filled share of the bar segment below the threshold, from 0 to 1.
     readonly property real lowSegmentFill: thresholdLevel > 0 ? Math.min(level, thresholdLevel) / thresholdLevel : 0
@@ -95,9 +99,6 @@ QtObject {
         return MouseBatteryViewModel.Tone.Normal;
     }
 
-    // Fired once when a live reading drops to or below the low threshold.
-    signal lowBatteryReached(percent: int, deviceName: string)
-
     component NullDevice: QtObject {
         readonly property real percentage: 0
         readonly property string model: ""
@@ -130,7 +131,7 @@ QtObject {
         chargeState: {
             if (device.state === UPowerDeviceState.FullyCharged)
                 return MouseBatteryViewModel.ChargeState.FullyCharged;
-            if (device.state === UPowerDeviceState.Charging)
+            if (device.state === UPowerDeviceState.Charging || device.state === UPowerDeviceState.PendingCharge)
                 return MouseBatteryViewModel.ChargeState.Charging;
             return MouseBatteryViewModel.ChargeState.Discharging;
         }
@@ -159,7 +160,11 @@ QtObject {
 
         readonly property bool isMouseLive: mouse !== null && isReporting(mouse)
 
+        readonly property int rearmMargin: 5
+
         readonly property bool hasLowLiveReading: isMouseLive && live.isLow
+
+        readonly property bool hasRearmingReading: isMouseLive && live.percent > root.lowBatteryPercent + rearmMargin
 
         readonly property NullDevice nullDevice: NullDevice {}
 
@@ -212,28 +217,33 @@ QtObject {
             return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
         }
 
-        // Announces once per drop into the low state. A live reading above
-        // the threshold re-arms, losing the mouse keeps the latch so a
-        // sleeping low mouse does not announce again on every wake.
+        // Announces once per drop into the low state. Only a live reading
+        // above the threshold plus a margin re-arms, so jitter around the
+        // threshold or brief charging contact does not announce again.
+        // Losing the mouse keeps the latch so a sleeping low mouse does
+        // not announce again on every wake.
         function announceLowBattery(): void {
             if (!isMouseLive)
                 return;
-            if (!live.isLow) {
+            if (hasRearmingReading) {
                 hasAnnouncedLowBattery = false;
                 return;
             }
-            if (hasAnnouncedLowBattery)
+            if (!live.isLow || hasAnnouncedLowBattery)
                 return;
             hasAnnouncedLowBattery = true;
-            if (isReady)
+            if (isReady && root.notifyOnLowBattery)
                 root.lowBatteryReached(live.percent, live.deviceName);
         }
 
-        onIsMouseLiveChanged: announceLowBattery()
         onHasLowLiveReadingChanged: announceLowBattery()
+        onHasRearmingReadingChanged: announceLowBattery()
     }
 
     readonly property Private _private: Private {}
+
+    // Fired once when a live reading drops to or below the low threshold.
+    signal lowBatteryReached(percent: int, deviceName: string)
 
     enum ChargeState {
         Discharging,

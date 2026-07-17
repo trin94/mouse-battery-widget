@@ -24,6 +24,7 @@ TestCase {
             showPercentage: true
             showBolt: true
             lowBatteryPercent: 20
+            notifyOnLowBattery: true
         }
     }
 
@@ -132,7 +133,7 @@ TestCase {
         compare(spy.count, 2);
     }
 
-    function test_notifiesAgainAfterChargingInBetween() {
+    function test_chargingBelowMarginDoesNotRearm() {
         const mouse = bridge.addMouse({});
         const control = makeControl();
         const spy = makeSpy(control, "lowBatteryReached");
@@ -145,6 +146,84 @@ TestCase {
         });
         bridge.update(mouse, {
             state: UPowerDeviceState.Discharging
+        });
+
+        compare(spy.count, 1);
+    }
+
+    function test_chargingPastMarginRearms() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.18
+        });
+        bridge.update(mouse, {
+            state: UPowerDeviceState.Charging
+        });
+        bridge.update(mouse, {
+            percentage: 0.5
+        });
+        bridge.update(mouse, {
+            state: UPowerDeviceState.Discharging
+        });
+        bridge.update(mouse, {
+            percentage: 0.18
+        });
+
+        compare(spy.count, 2);
+    }
+
+    function test_jitterAroundThresholdNotifiesOnce() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.2
+        });
+        bridge.update(mouse, {
+            percentage: 0.21
+        });
+        bridge.update(mouse, {
+            percentage: 0.2
+        });
+
+        compare(spy.count, 1);
+    }
+
+    function test_recoveryToMarginDoesNotRearm() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.2
+        });
+        bridge.update(mouse, {
+            percentage: 0.25
+        });
+        bridge.update(mouse, {
+            percentage: 0.2
+        });
+
+        compare(spy.count, 1);
+    }
+
+    function test_recoveryAboveMarginRearms() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.2
+        });
+        bridge.update(mouse, {
+            percentage: 0.26
+        });
+        bridge.update(mouse, {
+            percentage: 0.19
         });
 
         compare(spy.count, 2);
@@ -184,9 +263,22 @@ TestCase {
         compare(spy.count, 1);
     }
 
-    function test_chargingMouseDoesNotNotify() {
+    function test_chargingMouseDoesNotNotify_data() {
+        return [
+            {
+                tag: "charging",
+                state: UPowerDeviceState.Charging
+            },
+            {
+                tag: "pendingCharge",
+                state: UPowerDeviceState.PendingCharge
+            }
+        ];
+    }
+
+    function test_chargingMouseDoesNotNotify(data) {
         const mouse = bridge.addMouse({
-            state: UPowerDeviceState.Charging,
+            state: data.state,
             percentage: 0.5
         });
         const control = makeControl();
@@ -197,6 +289,107 @@ TestCase {
         });
 
         compare(spy.count, 0);
+    }
+
+    function test_loweringThresholdPastMarginRearms() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+        bridge.update(mouse, {
+            percentage: 0.15
+        });
+        compare(spy.count, 1);
+
+        control.lowBatteryPercent = 5;
+        bridge.update(mouse, {
+            percentage: 0.05
+        });
+
+        compare(spy.count, 2);
+    }
+
+    function test_loweringThresholdWithinMarginKeepsLatch() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+        bridge.update(mouse, {
+            percentage: 0.15
+        });
+        compare(spy.count, 1);
+
+        control.lowBatteryPercent = 12;
+        bridge.update(mouse, {
+            percentage: 0.12
+        });
+
+        compare(spy.count, 1);
+    }
+
+    function test_zeroThresholdNotifiesOnlyAtEmpty() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl({
+            lowBatteryPercent: 0
+        });
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.01
+        });
+        compare(spy.count, 0);
+
+        bridge.update(mouse, {
+            percentage: 0
+        });
+        compare(spy.count, 1);
+    }
+
+    function test_fullThresholdNotifiesOnAppearance() {
+        const control = makeControl({
+            lowBatteryPercent: 100
+        });
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.addMouse({});
+
+        compare(spy.count, 1);
+    }
+
+    function test_disabledNotificationStaysSilent() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl({
+            notifyOnLowBattery: false
+        });
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            percentage: 0.15
+        });
+
+        compare(spy.count, 0);
+    }
+
+    function test_enablingWhileLowDoesNotNotify() {
+        const mouse = bridge.addMouse({});
+        const control = makeControl({
+            notifyOnLowBattery: false
+        });
+        const spy = makeSpy(control, "lowBatteryReached");
+        bridge.update(mouse, {
+            percentage: 0.15
+        });
+
+        control.notifyOnLowBattery = true;
+
+        compare(spy.count, 0);
+
+        bridge.update(mouse, {
+            percentage: 0.8
+        });
+        bridge.update(mouse, {
+            percentage: 0.19
+        });
+
+        compare(spy.count, 1);
     }
 
     function test_raisingThresholdAboveLevelNotifies() {
