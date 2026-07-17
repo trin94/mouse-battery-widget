@@ -125,6 +125,18 @@ def test_mouse_with_unknown_state_is_ignored(mock: UPowerMock, mouse: str, make_
     assert state["isMouseDetected"]
 
 
+def test_mouse_with_unknown_state_shows_its_model_name(
+    mock: UPowerMock, mouse: str, make_view_model: MakeViewModel
+) -> None:
+    mock.update_device(mouse, State=STATE_UNKNOWN)
+
+    vm = make_view_model()
+
+    state = vm.wait_state(lambda state: state["deviceName"] == "Test Mouse")
+    assert not state["isLive"]
+    assert not state["hasData"]
+
+
 def test_mouse_added_at_runtime_is_picked_up(add_mouse: AddMouse, make_view_model: MakeViewModel) -> None:
     vm = make_view_model()
     state = vm.wait_ready()

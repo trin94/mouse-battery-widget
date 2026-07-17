@@ -21,7 +21,7 @@ PopoutComponent {
         return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
     }
 
-    headerText: viewModel.deviceName
+    headerText: viewModel.isMouseDetected || viewModel.hasData ? viewModel.deviceName : I18n.tr("Mouse Battery")
 
     // qmlformat off
     detailsText: viewModel.isLive ? ""

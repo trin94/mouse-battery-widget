@@ -27,7 +27,7 @@ QtObject {
     readonly property bool hasData: _private.current.hasData
 
     // UPower lists a mouse device at all, whatever its state.
-    readonly property bool isMouseDetected: UPower.devices.values.some(d => d.type === UPowerDeviceType.Mouse)
+    readonly property bool isMouseDetected: _private.mouse !== null
 
     // Battery level from 0 to 1, frozen at the last reading while stale.
     readonly property real level: _private.current.level
@@ -117,24 +117,31 @@ QtObject {
     component Private: QtObject {
         id: priv
 
-        readonly property UPowerDevice mouse: UPower.devices.values.find(d => d.ready
-            && d.type === UPowerDeviceType.Mouse
-            && d.state !== UPowerDeviceState.Unknown) ?? null
+        readonly property UPowerDevice mouse: {
+            const mice = UPower.devices.values.filter(d => d.type === UPowerDeviceType.Mouse);
+            return mice.find(d => isReporting(d)) ?? mice[0] ?? null;
+        }
+
+        readonly property bool isMouseLive: mouse !== null && isReporting(mouse)
 
         readonly property NullDevice nullDevice: NullDevice {}
 
-        readonly property DisplayState noData: DisplayState {}
-        readonly property LiveState live: LiveState { device: priv.mouse ?? priv.nullDevice }
+        readonly property DisplayState noData: DisplayState { deviceName: priv.mouse?.model || "Mouse" }
+        readonly property LiveState live: LiveState { device: priv.isMouseLive ? priv.mouse : priv.nullDevice }
         readonly property StaleState stale: StaleState { reading: priv.lastReading }
 
-        readonly property DisplayState current: mouse ? live : lastReading.valid ? stale : noData
+        readonly property DisplayState current: isMouseLive ? live : lastReading.valid ? stale : noData
 
         property var lastReading: ({ valid: false, level: 0, name: "" })
 
-        function captureReading() {
+        function captureReading(): void {
             if (!root.isLive)
                 return;
             lastReading = { valid: true, level: root.level, name: root.deviceName };
+        }
+
+        function isReporting(device: UPowerDevice): bool {
+            return device.ready && device.state !== UPowerDeviceState.Unknown;
         }
     }
     // qmlformat on
