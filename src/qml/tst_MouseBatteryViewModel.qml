@@ -86,7 +86,7 @@ TestCase {
         compare(control.deviceName, "Mouse");
     }
 
-    function test_mouseWithUnknownStateIsIgnored() {
+    function test_mouseWithUnknownStateIsDetectedButIgnored() {
         bridge.addMouse({
             state: UPowerDeviceState.Unknown
         });
@@ -95,18 +95,8 @@ TestCase {
 
         verify(!control.hasData);
         verify(control.isDimmed);
-        compare(control.emptyStateText, "No recent battery data. Waiting for Test Mouse to report.");
-    }
-
-    function test_mouseWithUnknownStateShowsItsModelName() {
-        bridge.addMouse({
-            state: UPowerDeviceState.Unknown
-        });
-
-        const control = makeControl();
-
         compare(control.deviceName, "Test Mouse");
-        verify(!control.hasData);
+        compare(control.emptyStateText, "No recent battery data. Waiting for Test Mouse to report.");
     }
 
     function test_mouseAddedAtRuntimeIsPickedUp() {
@@ -143,24 +133,6 @@ TestCase {
         compare(control.deviceName, "Test Mouse");
     }
 
-    function test_dischargingMouseIsShown() {
-        bridge.addMouse({});
-
-        const control = makeControl();
-
-        verify(control.hasData);
-        verify(!control.isDimmed);
-        compare(control.barLabel, "100%");
-        compare(control.percentText, "100%");
-        compare(control.statusText, "Discharging");
-        compare(control.estimateText, "");
-        compare(control.emptyStateText, "");
-        compare(control.deviceName, "Test Mouse");
-        compare(control.level, 1);
-        verify(!control.showsBolt);
-        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
-    }
-
     function test_mouseWithoutModelGetsFallbackName() {
         bridge.addMouse({
             model: ""
@@ -170,6 +142,173 @@ TestCase {
 
         verify(!control.isDimmed);
         compare(control.deviceName, "Mouse");
+    }
+
+    function test_dischargingMouseIsShown() {
+        bridge.addMouse({});
+
+        const control = makeControl();
+
+        verify(control.hasData);
+        verify(!control.isDimmed);
+        compare(control.barLabel, "100%");
+        compare(control.percentText, "100%");
+        compare(control.deviceName, "Test Mouse");
+        compare(control.level, 1);
+        compare(control.emptyStateText, "");
+    }
+
+    function test_statusText_data() {
+        return [
+            {
+                tag: "discharging",
+                props: {},
+                expected: "Discharging"
+            },
+            {
+                tag: "charging",
+                props: {
+                    state: UPowerDeviceState.Charging
+                },
+                expected: "Charging"
+            },
+            {
+                tag: "fullyCharged",
+                props: {
+                    state: UPowerDeviceState.FullyCharged
+                },
+                expected: "Fully charged"
+            },
+            {
+                tag: "notReporting",
+                props: {
+                    state: UPowerDeviceState.Unknown
+                },
+                expected: ""
+            }
+        ];
+    }
+
+    function test_statusText(data) {
+        bridge.addMouse(data.props);
+
+        compare(makeControl().statusText, data.expected);
+    }
+
+    function test_estimateText_data() {
+        return [
+            {
+                tag: "timeRemaining",
+                props: {
+                    timeToEmpty: 4500
+                },
+                expected: "Time remaining: 1h 15m"
+            },
+            {
+                tag: "timeUntilFull",
+                props: {
+                    state: UPowerDeviceState.Charging,
+                    timeToFull: 2700,
+                    timeToEmpty: 9999
+                },
+                expected: "Time until full: 45m"
+            },
+            {
+                tag: "chargingWithoutEstimate",
+                props: {
+                    state: UPowerDeviceState.Charging,
+                    timeToEmpty: 9999
+                },
+                expected: ""
+            },
+            {
+                tag: "dischargingWithoutEstimate",
+                props: {},
+                expected: ""
+            }
+        ];
+    }
+
+    function test_estimateText(data) {
+        bridge.addMouse(data.props);
+
+        compare(makeControl().estimateText, data.expected);
+    }
+
+    function test_tone_data() {
+        return [
+            {
+                tag: "discharging",
+                props: {
+                    percentage: 0.5
+                },
+                expected: MouseBatteryViewModel.Tone.Normal
+            },
+            {
+                tag: "atLowThreshold",
+                props: {
+                    percentage: 0.2
+                },
+                expected: MouseBatteryViewModel.Tone.Low
+            },
+            {
+                tag: "aboveLowThreshold",
+                props: {
+                    percentage: 0.21
+                },
+                expected: MouseBatteryViewModel.Tone.Normal
+            },
+            {
+                tag: "charging",
+                props: {
+                    state: UPowerDeviceState.Charging
+                },
+                expected: MouseBatteryViewModel.Tone.Charging
+            },
+            {
+                tag: "fullyCharged",
+                props: {
+                    state: UPowerDeviceState.FullyCharged
+                },
+                expected: MouseBatteryViewModel.Tone.Charging
+            }
+        ];
+    }
+
+    function test_tone(data) {
+        bridge.addMouse(data.props);
+
+        compare(makeControl().tone, data.expected);
+    }
+
+    function test_showsBolt_data() {
+        return [
+            {
+                tag: "discharging",
+                props: {},
+                expected: false
+            },
+            {
+                tag: "charging",
+                props: {
+                    state: UPowerDeviceState.Charging
+                },
+                expected: true
+            },
+            {
+                tag: "fullyCharged",
+                props: {
+                    state: UPowerDeviceState.FullyCharged
+                },
+                expected: true
+            }
+        ];
+    }
+
+    function test_showsBolt(data) {
+        bridge.addMouse(data.props);
+
+        compare(makeControl().showsBolt, data.expected);
     }
 
     function test_propertyUpdatesPropagate() {
@@ -185,90 +324,6 @@ TestCase {
         compare(control.percentText, "12%");
         compare(control.statusText, "Charging");
         verify(control.showsBolt);
-        compare(control.tone, MouseBatteryViewModel.Tone.Charging);
-    }
-
-    function test_lowDischargingMouseIsMarkedLow() {
-        bridge.addMouse({
-            percentage: 0.2
-        });
-
-        const control = makeControl();
-
-        verify(!control.isDimmed);
-        compare(control.tone, MouseBatteryViewModel.Tone.Low);
-    }
-
-    function test_mouseAboveLowThresholdIsNotMarkedLow() {
-        bridge.addMouse({
-            percentage: 0.21
-        });
-
-        const control = makeControl();
-
-        verify(!control.isDimmed);
-        compare(control.tone, MouseBatteryViewModel.Tone.Normal);
-    }
-
-    function test_dischargingMouseShowsTimeRemaining() {
-        bridge.addMouse({
-            timeToEmpty: 4500
-        });
-
-        const control = makeControl();
-
-        verify(!control.isDimmed);
-        compare(control.estimateText, "Time remaining: 1h 15m");
-    }
-
-    function test_chargingMouseShowsBolt() {
-        bridge.addMouse({
-            percentage: 0.5,
-            state: UPowerDeviceState.Charging
-        });
-
-        const control = makeControl();
-
-        compare(control.percentText, "50%");
-        compare(control.statusText, "Charging");
-        verify(control.showsBolt);
-        compare(control.tone, MouseBatteryViewModel.Tone.Charging);
-    }
-
-    function test_chargingMouseShowsTimeUntilFull() {
-        bridge.addMouse({
-            state: UPowerDeviceState.Charging,
-            timeToFull: 2700,
-            timeToEmpty: 9999
-        });
-
-        const control = makeControl();
-
-        verify(!control.isDimmed);
-        compare(control.estimateText, "Time until full: 45m");
-    }
-
-    function test_chargingMouseWithoutEstimateHasNoDuration() {
-        bridge.addMouse({
-            state: UPowerDeviceState.Charging,
-            timeToEmpty: 9999
-        });
-
-        const control = makeControl();
-
-        verify(!control.isDimmed);
-        compare(control.estimateText, "");
-    }
-
-    function test_fullyChargedMouseShowsBolt() {
-        bridge.addMouse({
-            state: UPowerDeviceState.FullyCharged
-        });
-
-        const control = makeControl();
-
-        verify(control.showsBolt);
-        compare(control.statusText, "Fully charged");
         compare(control.tone, MouseBatteryViewModel.Tone.Charging);
     }
 
