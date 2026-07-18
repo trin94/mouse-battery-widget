@@ -13,17 +13,10 @@ import qs.Common
 QtObject {
     id: root
 
-    // User setting: show the percentage label in the bar.
-    required property bool showPercentage
-
-    // User setting: show the charging bolt in the bar.
-    required property bool showBolt
-
-    // User setting: percentage at or below which the battery counts as low.
-    required property int lowBatteryPercent
-
-    // User setting: announce the drop into the low state.
-    required property bool notifyOnLowBattery
+    required property bool showPercentage // User setting: show the percentage label in the bar.
+    required property bool showBolt // User setting: show the charging bolt in the bar.
+    required property int lowBatteryPercent // User setting: percentage at or below which the battery counts as low.
+    required property bool notifyOnLowBattery // User setting: announce the drop into the low state.
 
     // Percentage text for the bar, empty while hidden by setting or missing data.
     readonly property string barLabel: showPercentage ? percentText : ""
@@ -131,9 +124,9 @@ QtObject {
         chargeState: {
             if (device.state === UPowerDeviceState.FullyCharged)
                 return MouseBatteryViewModel.ChargeState.FullyCharged;
-            if (device.state === UPowerDeviceState.Charging || device.state === UPowerDeviceState.PendingCharge)
-                return MouseBatteryViewModel.ChargeState.Charging;
-            return MouseBatteryViewModel.ChargeState.Discharging;
+            if (MouseBatteryDevices.isDraining(device.state))
+                return MouseBatteryViewModel.ChargeState.Discharging;
+            return MouseBatteryViewModel.ChargeState.Charging;
         }
 
         secondsUntilEmpty: chargeState === MouseBatteryViewModel.ChargeState.Discharging ? device.timeToEmpty : 0
@@ -153,19 +146,8 @@ QtObject {
     component Private: QtObject {
         id: priv
 
-        readonly property UPowerDevice mouse: {
-            const mice = UPower.devices.values.filter(d => d.type === UPowerDeviceType.Mouse);
-            return mice.find(d => isReporting(d)) ?? mice[0] ?? null;
-        }
-
-        readonly property bool isMouseLive: mouse !== null && isReporting(mouse)
-
-        readonly property int rearmMargin: 5
-
-        readonly property bool hasLowLiveReading: isMouseLive && live.isLow
-
-        readonly property bool hasRearmingReading: isMouseLive && live.percent > root.lowBatteryPercent + rearmMargin
-
+        readonly property UPowerDevice mouse: MouseBatteryDevices.mouse
+        readonly property bool isMouseLive: MouseBatteryDevices.reportingMouse !== null
         readonly property NullDevice nullDevice: NullDevice {}
 
         readonly property DisplayState noData: DisplayState {
@@ -173,7 +155,7 @@ QtObject {
         }
 
         readonly property LiveState live: LiveState {
-            device: priv.isMouseLive ? priv.mouse : priv.nullDevice
+            device: priv.isMouseLive ? priv.mouse ?? priv.nullDevice : priv.nullDevice
         }
 
         readonly property StaleState stale: StaleState {
@@ -192,23 +174,35 @@ QtObject {
                 name: ""
             })
 
-        property bool hasAnnouncedLowBattery: false
+        readonly property Connections reportingMouseWatcher: Connections {
+            target: MouseBatteryDevices
 
-        // Suppresses the signal for the state found at startup.
-        property bool isReady: false
+            function onReportingMouseChanged() {
+                priv.captureReading();
+            }
+        }
+
+        readonly property Connections readingWatcher: Connections {
+            target: MouseBatteryDevices.reportingMouse
+
+            function onPercentageChanged() {
+                priv.captureReading();
+            }
+
+            function onModelChanged() {
+                priv.captureReading();
+            }
+        }
 
         function captureReading(): void {
-            if (!isMouseLive)
+            const device = MouseBatteryDevices.reportingMouse;
+            if (device === null)
                 return;
             lastReading = {
                 valid: true,
-                level: root.level,
-                name: root.deviceName
+                level: device.percentage,
+                name: device.model || "Mouse"
             };
-        }
-
-        function isReporting(device: UPowerDevice): bool {
-            return device.ready && device.state !== UPowerDeviceState.Unknown;
         }
 
         function formatDuration(seconds: real): string {
@@ -216,34 +210,9 @@ QtObject {
             const minutes = Math.floor((seconds % 3600) / 60);
             return hours > 0 ? I18n.tr("%1h %2m").arg(hours).arg(minutes) : I18n.tr("%1m").arg(minutes);
         }
-
-        // Announces once per drop into the low state. Only a live reading
-        // above the threshold plus a margin re-arms, so jitter around the
-        // threshold or brief charging contact does not announce again.
-        // Losing the mouse keeps the latch so a sleeping low mouse does
-        // not announce again on every wake.
-        function announceLowBattery(): void {
-            if (!isMouseLive)
-                return;
-            if (hasRearmingReading) {
-                hasAnnouncedLowBattery = false;
-                return;
-            }
-            if (!live.isLow || hasAnnouncedLowBattery)
-                return;
-            hasAnnouncedLowBattery = true;
-            if (isReady && root.notifyOnLowBattery)
-                root.lowBatteryReached(live.percent, live.deviceName);
-        }
-
-        onHasLowLiveReadingChanged: announceLowBattery()
-        onHasRearmingReadingChanged: announceLowBattery()
     }
 
     readonly property Private _private: Private {}
-
-    // Fired once when a live reading drops to or below the low threshold.
-    signal lowBatteryReached(percent: int, deviceName: string)
 
     enum ChargeState {
         Discharging,
@@ -258,13 +227,5 @@ QtObject {
         Stale
     }
 
-    onIsDimmedChanged: _private.captureReading()
-    onLevelChanged: _private.captureReading()
-    onDeviceNameChanged: _private.captureReading()
-
-    Component.onCompleted: {
-        _private.captureReading();
-        _private.announceLowBattery();
-        _private.isReady = true;
-    }
+    Component.onCompleted: _private.captureReading()
 }

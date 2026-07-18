@@ -9,7 +9,9 @@ import QtQuick
 import qs.Common
 import qs.Widgets
 
-Row {
+import "../logic"
+
+Column {
     id: root
 
     required property MouseBatteryViewModel viewModel
@@ -27,22 +29,22 @@ Row {
         name: "mouse"
         size: root.iconSize
         color: root.contentColor
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     Item {
-        height: mouseIcon.height
-        width: root.viewModel.showsBolt ? Theme.spacingXS + root.iconSize : 0
-        anchors.verticalCenter: parent.verticalCenter
+        width: mouseIcon.width
+        height: root.viewModel.showsBolt ? Theme.spacingXS + root.iconSize : 0
+        anchors.horizontalCenter: parent.horizontalCenter
         clip: true
 
         DankIcon {
             name: "bolt"
             size: root.iconSize
             color: Theme.primary
-            anchors.left: parent.left
-            anchors.leftMargin: Theme.spacingXS
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.topMargin: Theme.spacingXS
+            anchors.horizontalCenter: parent.horizontalCenter
             opacity: root.viewModel.showsBolt ? 1 : 0
 
             Behavior on opacity {
@@ -53,7 +55,7 @@ Row {
             }
         }
 
-        Behavior on width {
+        Behavior on height {
             NumberAnimation {
                 duration: Theme.shortDuration
                 easing.type: Theme.standardEasing
@@ -62,9 +64,9 @@ Row {
     }
 
     Item {
-        height: labelText.implicitHeight
-        width: root.viewModel.barLabel ? Theme.spacingXS + labelText.implicitWidth : 0
-        anchors.verticalCenter: parent.verticalCenter
+        width: labelText.implicitWidth
+        height: root.viewModel.barLabel ? Theme.spacingXS + labelText.implicitHeight : 0
+        anchors.horizontalCenter: parent.horizontalCenter
         clip: true
 
         StyledText {
@@ -72,12 +74,12 @@ Row {
             text: root.viewModel.barLabel
             font.pixelSize: root.textSize
             color: root.contentColor
-            anchors.left: parent.left
-            anchors.leftMargin: Theme.spacingXS
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top: parent.top
+            anchors.topMargin: Theme.spacingXS
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Behavior on width {
+        Behavior on height {
             NumberAnimation {
                 duration: Theme.shortDuration
                 easing.type: Theme.standardEasing

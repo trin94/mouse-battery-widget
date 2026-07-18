@@ -15,16 +15,14 @@ TestCase {
     height: 400
     visible: true
     when: windowShown
-    name: "MouseBatteryViewModelNotification"
+    name: "MouseBatteryMonitor"
 
     Component {
         id: objectUnderTest
 
-        MouseBatteryViewModel {
-            showPercentage: true
-            showBolt: true
+        MouseBatteryMonitor {
             lowBatteryPercent: 20
-            notifyOnLowBattery: true
+            enabled: true
         }
     }
 
@@ -42,7 +40,7 @@ TestCase {
         bridge.reset();
     }
 
-    function makeControl(initProperties = {}): MouseBatteryViewModel {
+    function makeControl(initProperties = {}): MouseBatteryMonitor {
         const control = createTemporaryObject(objectUnderTest, testCase, initProperties);
         verify(control);
         return control;
@@ -113,6 +111,25 @@ TestCase {
         });
 
         compare(spy.count, 1);
+        compare(spy.signalArguments[0][0], 15);
+    }
+
+    function test_wakingMouseWithUnreadPercentageDoesNotNotify() {
+        const mouse = bridge.addMouse({
+            state: UPowerDeviceState.Unknown,
+            percentage: 0
+        });
+        const control = makeControl();
+        const spy = makeSpy(control, "lowBatteryReached");
+
+        bridge.update(mouse, {
+            state: UPowerDeviceState.Discharging
+        });
+        bridge.update(mouse, {
+            percentage: 0.77
+        });
+
+        compare(spy.count, 0);
     }
 
     function test_notifiesAgainAfterRecharge() {
@@ -338,7 +355,7 @@ TestCase {
         compare(spy.count, 0);
 
         bridge.update(mouse, {
-            percentage: 0
+            percentage: 0.004
         });
         compare(spy.count, 1);
     }
@@ -357,7 +374,7 @@ TestCase {
     function test_disabledNotificationStaysSilent() {
         const mouse = bridge.addMouse({});
         const control = makeControl({
-            notifyOnLowBattery: false
+            enabled: false
         });
         const spy = makeSpy(control, "lowBatteryReached");
 
@@ -371,14 +388,14 @@ TestCase {
     function test_enablingWhileLowDoesNotNotify() {
         const mouse = bridge.addMouse({});
         const control = makeControl({
-            notifyOnLowBattery: false
+            enabled: false
         });
         const spy = makeSpy(control, "lowBatteryReached");
         bridge.update(mouse, {
             percentage: 0.15
         });
 
-        control.notifyOnLowBattery = true;
+        control.enabled = true;
 
         compare(spy.count, 0);
 

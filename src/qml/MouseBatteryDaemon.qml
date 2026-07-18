@@ -10,6 +10,8 @@ import Quickshell
 
 import qs.Common
 
+import "logic"
+
 QtObject {
     id: root
 
@@ -19,11 +21,15 @@ QtObject {
     property int _lowBatteryPercent: MouseBatteryDefaults.lowBatteryPercent
     property bool _notifyOnLowBattery: MouseBatteryDefaults.notifyOnLowBattery
 
-    readonly property MouseBatteryViewModel _viewModel: MouseBatteryViewModel {
-        showPercentage: true
-        showBolt: true
+    readonly property MouseBatteryMonitor _monitor: MouseBatteryMonitor {
         lowBatteryPercent: root._lowBatteryPercent
-        notifyOnLowBattery: root._notifyOnLowBattery
+        enabled: root._notifyOnLowBattery
+
+        onLowBatteryReached: (percent, deviceName) => {
+            const summary = I18n.tr("Mouse battery low");
+            const body = I18n.tr("%1 is at %2%. Recharge it soon.").arg(deviceName).arg(percent);
+            Quickshell.execDetached(["notify-send", "-u", "normal", "-a", "Mouse Battery Widget", "-i", "battery-caution", "--", summary, body]);
+        }
     }
 
     readonly property Connections _settingsWatcher: Connections {
@@ -32,16 +38,6 @@ QtObject {
         function onPluginDataChanged(changedPluginId: string) {
             if (changedPluginId === root.pluginId)
                 root._loadSettings();
-        }
-    }
-
-    readonly property Connections _notifier: Connections {
-        target: root._viewModel
-
-        function onLowBatteryReached(percent: int, deviceName: string) {
-            const summary = I18n.tr("Mouse battery low");
-            const body = I18n.tr("%1 is at %2%. Recharge it soon.").arg(deviceName).arg(percent);
-            Quickshell.execDetached(["notify-send", "-u", "normal", "-a", "Mouse Battery Widget", "-i", "battery-caution", "--", summary, body]);
         }
     }
 

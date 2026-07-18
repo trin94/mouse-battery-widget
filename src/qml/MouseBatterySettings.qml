@@ -8,6 +8,8 @@ import qs.Common
 import qs.Modules.Plugins
 import qs.Widgets
 
+import "logic"
+
 PluginSettings {
     id: root
 

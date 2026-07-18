@@ -9,7 +9,9 @@ import QtQuick
 import qs.Common
 import qs.Widgets
 
-Column {
+import "../logic"
+
+Row {
     id: root
 
     required property MouseBatteryViewModel viewModel
@@ -27,22 +29,22 @@ Column {
         name: "mouse"
         size: root.iconSize
         color: root.contentColor
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
     }
 
     Item {
-        width: mouseIcon.width
-        height: root.viewModel.showsBolt ? Theme.spacingXS + root.iconSize : 0
-        anchors.horizontalCenter: parent.horizontalCenter
+        height: mouseIcon.height
+        width: root.viewModel.showsBolt ? Theme.spacingXS + root.iconSize : 0
+        anchors.verticalCenter: parent.verticalCenter
         clip: true
 
         DankIcon {
             name: "bolt"
             size: root.iconSize
             color: Theme.primary
-            anchors.top: parent.top
-            anchors.topMargin: Theme.spacingXS
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: Theme.spacingXS
+            anchors.verticalCenter: parent.verticalCenter
             opacity: root.viewModel.showsBolt ? 1 : 0
 
             Behavior on opacity {
@@ -53,7 +55,7 @@ Column {
             }
         }
 
-        Behavior on height {
+        Behavior on width {
             NumberAnimation {
                 duration: Theme.shortDuration
                 easing.type: Theme.standardEasing
@@ -62,9 +64,9 @@ Column {
     }
 
     Item {
-        width: labelText.implicitWidth
-        height: root.viewModel.barLabel ? Theme.spacingXS + labelText.implicitHeight : 0
-        anchors.horizontalCenter: parent.horizontalCenter
+        height: labelText.implicitHeight
+        width: root.viewModel.barLabel ? Theme.spacingXS + labelText.implicitWidth : 0
+        anchors.verticalCenter: parent.verticalCenter
         clip: true
 
         StyledText {
@@ -72,12 +74,12 @@ Column {
             text: root.viewModel.barLabel
             font.pixelSize: root.textSize
             color: root.contentColor
-            anchors.top: parent.top
-            anchors.topMargin: Theme.spacingXS
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: Theme.spacingXS
+            anchors.verticalCenter: parent.verticalCenter
         }
 
-        Behavior on height {
+        Behavior on width {
             NumberAnimation {
                 duration: Theme.shortDuration
                 easing.type: Theme.standardEasing
