@@ -10,6 +10,8 @@ import signal
 import subprocess
 import sys
 import threading
+from dataclasses import dataclass
+from enum import IntEnum
 from pathlib import Path
 
 from dbus_fast.aio import MessageBus
@@ -20,13 +22,100 @@ from upower_mock import UPowerMock
 PREVIEW_DIR = Path(__file__).resolve().parent / "preview"
 
 CONTROL_NAME = "io.github.trin94.MouseBatteryWidget.Mock"
-STATES = {"unknown": 0, "charging": 1, "discharging": 2, "full": 4}
+
+
+class State(IntEnum):
+    UNKNOWN = 0
+    CHARGING = 1
+    DISCHARGING = 2
+    EMPTY = 3
+    FULL = 4
+    PENDING_CHARGE = 5
+
+
+STATES = {member.name.lower().replace("_", "-"): int(member) for member in State}
 
 MOUSE_TYPE = 5
 DEVICE_NAME = "mock_mouse"
+
+
+@dataclass(frozen=True)
+class Delay:
+    seconds: float
+
+
+@dataclass(frozen=True)
+class Connected:
+    plugged: bool
+
+
+@dataclass(frozen=True)
+class Update:
+    state: State | None = None
+    percentage: float | None = None
+    model: str | None = None
+    time_to_empty: int | None = None
+    time_to_full: int | None = None
+
+    def props(self) -> dict[str, object]:
+        named = {
+            "State": None if self.state is None else int(self.state),
+            "Percentage": self.percentage,
+            "Model": self.model,
+            "TimeToEmpty": self.time_to_empty,
+            "TimeToFull": self.time_to_full,
+        }
+        return {key: value for key, value in named.items() if value is not None}
+
+
+Step = Delay | Connected | Update
+
+PRESETS: dict[str, list[Step]] = {
+    "fresh-login": [
+        Connected(True),
+        Update(state=State.UNKNOWN, percentage=0),
+    ],
+    "wake": [
+        Update(state=State.DISCHARGING),
+        Delay(0.4),
+        Update(percentage=77),
+    ],
+    "wake-low": [
+        Update(state=State.DISCHARGING, percentage=80),
+        Delay(0.6),
+        Update(state=State.UNKNOWN, percentage=0),
+        Delay(0.6),
+        Update(state=State.DISCHARGING),
+        Delay(0.4),
+        Update(percentage=15),
+    ],
+    "drain": [
+        Update(state=State.DISCHARGING, percentage=75),
+        Delay(0.5),
+        Update(percentage=60),
+        Delay(0.5),
+        Update(percentage=45),
+        Delay(0.5),
+        Update(percentage=30),
+        Delay(0.5),
+        Update(percentage=19),
+    ],
+    "charging-bounce": [
+        Update(state=State.DISCHARGING, percentage=75),
+        Delay(0.5),
+        Update(percentage=18),
+        Delay(0.6),
+        Update(state=State.CHARGING),
+        Delay(0.6),
+        Update(state=State.DISCHARGING),
+    ],
+    "sleep": [
+        Update(state=State.UNKNOWN),
+    ],
+}
 MOCK_MOUSE: dict[str, object] = {
     "Type": MOUSE_TYPE,
-    "State": STATES["discharging"],
+    "State": int(State.DISCHARGING),
     "Percentage": 75.0,
     "Model": "Mock Mouse",
     "NativePath": "hidpp_battery_mock",
@@ -77,6 +166,40 @@ class MockControlService(ServiceInterface):
     @method()
     def SetConnected(self, connected: "b"):
         self._mouse.set_connected(connected)
+
+    @method()
+    def SetModel(self, model: "s"):
+        self._mouse.update(Model=model)
+
+    @method()
+    def SetTimeToEmpty(self, seconds: "x"):
+        self._mouse.update(TimeToEmpty=seconds)
+
+    @method()
+    def SetTimeToFull(self, seconds: "x"):
+        self._mouse.update(TimeToFull=seconds)
+
+    @method()
+    def ListPresets(self) -> "s":
+        return ", ".join(PRESETS)
+
+    @method()
+    async def RunPreset(self, name: "s") -> "s":
+        steps = PRESETS.get(name)
+        if steps is None:
+            return f"unknown preset: {name}, valid: {', '.join(PRESETS)}"
+        for step in steps:
+            await self._apply(step)
+        return f"{name} done"
+
+    async def _apply(self, step: Step) -> None:
+        match step:
+            case Delay(seconds):
+                await asyncio.sleep(seconds)
+            case Connected(plugged):
+                self._mouse.set_connected(plugged)
+            case Update():
+                self._mouse.update(**step.props())
 
 
 def export_control(mouse: MockMouse) -> None:
