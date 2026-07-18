@@ -86,6 +86,19 @@ TestCase {
         compare(control.emptyStateText, "No recent battery data. Waiting for Test Mouse to report.");
     }
 
+    function test_mouseWithUnreadPercentageIsDetectedButIgnored() {
+        bridge.addMouse({
+            percentage: 0
+        });
+
+        const control = makeControl();
+
+        verify(!control.hasData);
+        verify(control.isDimmed);
+        compare(control.deviceName, "Test Mouse");
+        compare(control.emptyStateText, "No recent battery data. Waiting for Test Mouse to report.");
+    }
+
     function test_mouseAddedAtRuntimeIsPickedUp() {
         const control = makeControl();
         verify(control.isDimmed);

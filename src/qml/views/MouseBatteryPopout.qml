@@ -10,6 +10,8 @@ import qs.Common
 import qs.Modules.Plugins
 import qs.Widgets
 
+import "../logic"
+
 PopoutComponent {
     id: root
 

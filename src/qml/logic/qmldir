@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Elias Mueller
+#
+# SPDX-License-Identifier: MIT
+
+singleton MouseBatteryDefaults MouseBatteryDefaults.qml
+singleton MouseBatteryDevices MouseBatteryDevices.qml
+MouseBatteryMonitor MouseBatteryMonitor.qml
+MouseBatteryViewModel MouseBatteryViewModel.qml

@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: Elias Mueller
+#
+# SPDX-License-Identifier: MIT
+
+MouseBatteryHorizontalPill MouseBatteryHorizontalPill.qml
+MouseBatteryPopout MouseBatteryPopout.qml
+MouseBatteryVerticalPill MouseBatteryVerticalPill.qml

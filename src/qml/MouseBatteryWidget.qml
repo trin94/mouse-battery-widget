@@ -8,6 +8,9 @@ import QtQuick
 
 import qs.Modules.Plugins
 
+import "logic"
+import "views"
+
 PluginComponent {
     id: root
 
