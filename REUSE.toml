@@ -15,3 +15,9 @@ path = "uv.lock"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Elias Mueller"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "docs/preview.webp"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Elias Mueller"
+SPDX-License-Identifier = "MIT"

@@ -12,6 +12,8 @@ SPDX-License-Identifier: MIT
 
 A [Dank Material Shell](https://github.com/AvengeMedia/DankMaterialShell) plugin that shows your wireless mouse battery level in the bar.
 
+![Preview](docs/preview.webp)
+
 - 🔋 Battery percentage in a bar pill.
 - ⚡ Bolt icon while charging.
 - 💤 Keeps the last reading visible but dimmed while the mouse sleeps or is disconnected.
