@@ -15,7 +15,7 @@
     },
     "settings": "./src/qml/MouseBatterySettings.qml",
     "startupCheck": "./src/qml/MouseBatteryStartupCheck.qml",
-    "requires_dms": ">=1.4.0",
+    "requires_dms": ">=1.5.0",
     "dependencies": ["notify-send"],
     "permissions": ["settings_read", "settings_write", "process"]
 }
