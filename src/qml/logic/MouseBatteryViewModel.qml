@@ -106,7 +106,7 @@ QtObject {
         readonly property bool hasData: isLive || isStale
         property real level: 0
         property int percent: -1
-        property string deviceName: "Mouse"
+        property string deviceName: MouseBatteryDevices.displayName()
         property int chargeState: MouseBatteryViewModel.ChargeState.Discharging
         property real secondsUntilEmpty: 0
         property real secondsUntilFull: 0
@@ -119,7 +119,7 @@ QtObject {
         isLive: true
         level: device.percentage
         percent: Math.round(level * 100)
-        deviceName: device.model || "Mouse"
+        deviceName: MouseBatteryDevices.displayName(device.model)
 
         chargeState: {
             if (device.state === UPowerDeviceState.FullyCharged)
@@ -140,7 +140,7 @@ QtObject {
         isStale: true
         level: reading.level
         percent: Math.round(reading.level * 100)
-        deviceName: reading.name || "Mouse"
+        deviceName: MouseBatteryDevices.displayName(reading.name)
     }
 
     component Private: QtObject {
@@ -151,7 +151,7 @@ QtObject {
         readonly property NullDevice nullDevice: NullDevice {}
 
         readonly property DisplayState noData: DisplayState {
-            deviceName: priv.mouse?.model || "Mouse"
+            deviceName: MouseBatteryDevices.displayName(priv.mouse?.model)
         }
 
         readonly property LiveState live: LiveState {
@@ -201,7 +201,7 @@ QtObject {
             lastReading = {
                 valid: true,
                 level: device.percentage,
-                name: device.model || "Mouse"
+                name: device.model
             };
         }
 

@@ -48,7 +48,7 @@ QtObject {
             return;
         _hasAnnounced = true;
         if (_isReady && enabled)
-            lowBatteryReached(percent, _device.model || "Mouse");
+            lowBatteryReached(percent, MouseBatteryDevices.displayName(_device.model));
     }
 
     on_DeviceChanged: _evaluate()

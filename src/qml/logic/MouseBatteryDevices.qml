@@ -8,6 +8,8 @@ import QtQuick
 
 import Quickshell.Services.UPower
 
+import qs.Common
+
 QtObject {
     id: root
 
@@ -22,5 +24,9 @@ QtObject {
 
     function isDraining(state: int): bool {
         return state !== UPowerDeviceState.Charging && state !== UPowerDeviceState.PendingCharge && state !== UPowerDeviceState.FullyCharged;
+    }
+
+    function displayName(model = ""): string {
+        return model || I18n.tr("Mouse");
     }
 }
