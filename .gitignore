@@ -222,3 +222,4 @@ __pycache__/
 # Mock bar: generated symlinks into the installed DMS config
 /src/mock/preview/*
 !/src/mock/preview/shell.qml
+!/src/mock/preview/MockPluginService.qml
